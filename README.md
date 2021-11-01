@@ -25,13 +25,18 @@ You can create a developer account the same way you'd create a user account:
 ```js
 import { loginMagicLink } from '@compose-run/compose'
 
-loginMagicLink('your_email@gmail.com').then(({userId}) => console.log(userId))
+loginMagicLink('your_email@gmail.com')
+  .then(({userId}) => console.log(userId))
 ```
 
 After clicking on the magic link in your inbox, you'll see your `userId` in the console. Add it to the `developer` field like this:
 
 ```js
-useRealtimeState({name: 'test-state', initialState: [], developer: 'your-userId-here')
+useRealtimeState({
+  name: 'test-state', 
+  initialState: [], 
+  developer: 'your-userId-here'
+})
 ```
 
 This links this piece of state to your account. You will be able to store a small amount of data (~10mb/developer account) for free indefinitely, and we will reach out to you via email to upgrade your account or export your data if you exceed that limit.
@@ -49,7 +54,8 @@ useEffect(() => console.log(state), [state])
 You can also get the current value of the state `Promise` and log it:
 
 ```js
-getRealtimeState({name: 'test-state'}).then(console.log)
+getRealtimeState({name: 'test-state'})
+  .then(console.log)
 ```
 
 #### 3. Is data namespaced or all global?
@@ -59,7 +65,10 @@ Data is global by default, but you can add your own namespace via `/`s. If you a
 Even if you want your data to be publicly readable and writable, it's commonn to add your project's name as a prefix to prevent name collisions with others:
 
 ```js
-useRealtimeState({name: 'my-super-duper-unique-project/some-state', initialState: []})
+useRealtimeState({
+  name: 'my-super-duper-unique-project/some-state', 
+  initialState: []
+})
 ```
 
 #### 4. Can I make realtime state private?
@@ -70,13 +79,19 @@ By default, anyone can get or set realtime state via its `name`. You can make a 
 const currentUser = useCurrentUser()
 
 // only the current user can read or write this state
-useRealtimeState({name: `${currentUser.userId}/private state`, initialState: [])
+useRealtimeState({
+  name: `${currentUser.userId}/private state`, 
+  initialState: []
+})
 ```
 
 Not even you, the developer, will be able to read or write this state. You can add yourself as a reader & writer by adding your `userId` to the path:
 
-```
-useRealtimeState({name: `${DEVELOPER_USER_ID}/${currentUser.userId}/private state`, initialState: [])
+```js
+useRealtimeState({
+  name: `${DEVELOPER_USER_ID}/${currentUser.userId}/private state`,
+  initialState: []
+})
 ```
 
 You can nest arbitrarily many `userId`s like this to create a piece of state that those users can all read and write together. The order of the `userId`s doesn't matter for access control.
@@ -122,7 +137,10 @@ This limitation will be lifted when we launch **`useRealtimeQuery`** (_coming so
 `merge` is the default. We try to merge the edits as best we can. For example:
 
 ```js
-const [test, setTest] = useRealtimeState({name: 'test', initialState: []}) // merge is used by default
+const [test, setTest] = useRealtimeState({
+  name: 'test', 
+  initialState: []
+}) // merge is used by default
 
 setTest(['a', 'b'])
 
@@ -134,7 +152,11 @@ setTest(['a', 'c'])
 `last-write-wins` is the simplest, but you can lose data if two people edit simultaneously. For example:
 
 ```js
-const [test, setTest] = useRealtimeState({name: 'test', initialState: [], onConflict: 'last-write-wins'})
+const [test, setTest] = useRealtimeState({
+  name: 'test', 
+  initialState: [], 
+  onConflict: 'last-write-wins'
+})
 
 setTest(['a', 'b'])
 
@@ -146,7 +168,11 @@ setTest(['a', 'c'])
 The safest is `last-write-fails`. It will detect that two users tried to edit at the same time, and block the second from editing. This will allow you to `catch` the failed write and allow the user to try again. For example:
 
 ```js
-const [test, setTest] = useRealtimeState({name: 'test', initialState: [], onConflict: 'last-write-fails'})
+const [test, setTest] = useRealtimeState({
+  name: 'test', 
+  initialState: [], 
+  onConflict: 'last-write-fails'
+})
 
 setTest(['a', 'b'])
 
@@ -178,8 +204,14 @@ export default LoginOrCreateAccount() {
   return (
     <div>
       Login via magic link
-      <input type="email" onKeyPress={(e} => e.key === Enter && loginMagicLink(e.target.value) disabled={awaitingMagicLink} />
-      { awaitingMagicLink && <div>Check your inbox for the magic link</div> }
+      <input 
+        type="email" 
+        onKeyPress={(e} => e.key === Enter && loginMagicLink(e.target.value)} 
+        disabled={awaitingMagicLink} 
+      />
+      { awaitingMagicLink && 
+          <div>Check your inbox for the magic link</div> 
+      }
     </div>
   );
 }
