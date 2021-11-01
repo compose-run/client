@@ -18,9 +18,9 @@ Like `useState`, `useRealtimeState` is for maintaining simple state. By default,
 
 #### 1. How long will this data be persisted?
 
-All state under ~1mb will be persisted for at least 48-hours without creating a developer account.
+All state under ~1mb will be persisted for at least 48-hours without being tied to an account.
 
-You can create a developer account the same way you'd create a user account:
+Obtain your `userId` by logging in:
 
 ```js
 import { loginMagicLink } from '@compose-run/compose'
@@ -39,7 +39,7 @@ useRealtimeState({
 })
 ```
 
-This links this piece of state to your account. You will be able to store a small amount of data (~10mb/developer account) for free indefinitely, and we will reach out to you via email to upgrade your account or export your data if you exceed that limit.
+By linking a piece of named state to your `userId`, you sign yourself up to pay for that state when it exceeds our free limit. You will be able to store a small amount of data (~10mb/developer account) for free indefinitely. We will reach out to you via email to upgrade your account or export your data if you exceed that limit.
 
 #### 2. How do I see & debug the current value of the state?
 
@@ -51,7 +51,7 @@ const [state, setState] = useRealtimeState({name: 'test-state', initialState: []
 useEffect(() => console.log(state), [state])
 ```
 
-You can also get the current value of the state `Promise` and log it:
+You can also get the current value of the state via a `Promise` and log it:
 
 ```js
 getRealtimeState({name: 'test-state'})
@@ -60,9 +60,9 @@ getRealtimeState({name: 'test-state'})
 
 #### 3. Is data namespaced or all global?
 
-Data is global by default, but you can add your own namespace via `/`s. If you add `userId`s as the namespace path, it will allow that user to read and write the data. If the data has no `userId`s in its path, it will be globally readable and writable.
+Data is global by default, but you can add your own namespace via `/`s. If you add a user's `userId`s in the `name` path, it will allow that user to read and write the state. If the `name` has no `userId`s in its path, it will be globally readable and writable.
 
-Even if you want your data to be publicly readable and writable, it's commonn to add your project's name as a prefix to prevent name collisions with others:
+Even if you want your state to be publicly readable and writable, it's commonn to add your project's name as a prefix to prevent `name` collisions with others:
 
 ```js
 useRealtimeState({
