@@ -12,7 +12,7 @@ Like `useState`, `useRealtimeState` is for maintaining simple state. By default,
 
 Open this page in two tabs to see how data sync across them. Also feel free to edit this code:
 
-[ embedded codesandbox here that encourages you to open in a new tab ]
+[ embedded codesandbox here ]
 
 ### FAQ
 
