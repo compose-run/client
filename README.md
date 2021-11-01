@@ -39,7 +39,7 @@ useRealtimeState({
 })
 ```
 
-By linking a piece of named state to your `userId`, you sign yourself up to pay for that state when it exceeds our free limit. You will be able to store a small amount of data (~10mb/developer account) for free indefinitely. We will reach out to you via email to upgrade your account or export your data if you exceed that limit.
+By linking a piece of named state to your `userId`, you sign yourself up to pay for that state when it exceeds our free limit. You will be able to store a small amount of data (10mb/developer account) for free indefinitely. We will reach out to you via email to upgrade your account or export your data if you exceed that limit.
 
 #### 2. How do I see & debug the current value of the state?
 
@@ -227,3 +227,11 @@ Like `useReducer`, `useRealtime` is for maintaining more complex state. By defau
 ## `useRealtimeQuery` - _coming soon_
 
 `useRealtimeQuery` will enable you to store more data at a `name` than can fit in the user's browser by allowing you to filter it _on the server_ before sending it to the client.
+
+## Pricing 
+
+10mb - free
+1gb - $9 / month
+100gb - $10 / month
+1tb - $24 / month
+
