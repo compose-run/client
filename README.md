@@ -38,13 +38,15 @@ This links this piece of state to your account. You will be able to store a smal
 
 #### 2. How do I see & debug the current value of the state?
 
-Inside a React component that uses the state, you can print it to the console on changes like so:
+You can print out changes to some `state` from within a React component:
 
 ```js
-`useEffect(() => console.log(state), [state])
+const [state, setState] = useRealtimeState({name: 'test-state', initialState: []})
+
+useEffect(() => console.log(state), [state])
 ```
 
-Outside of any React component, you can get the current value of the state once like so:
+You can also get the current value of the state `Promise` and log it:
 
 ```js
 getRealtimeState({name: 'test-state'}).then(console.log)
