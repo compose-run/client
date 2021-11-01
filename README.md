@@ -2,7 +2,7 @@
 
 _A whole backend without leaving React_
 
-Realtime & persistent versions of the React hooks you already know. Authentication & realtime built-in. 100% severless. Get started in seconds.
+Realtime & persistent versions of the React hooks you already know. 100% severless. Authentication & realtime built-in. Get started in seconds.
 
 ![](https://user-images.githubusercontent.com/2288939/139447267-76a76bf7-f964-4f80-9c44-dd008e74fd8f.png)
 
@@ -10,7 +10,7 @@ Realtime & persistent versions of the React hooks you already know. Authenticati
 
 Like `useState`, `useRealtimeState` is for maintaining simple state. By default, it syncs the state across all instances of the same `name` for all users.
 
-Open this page in two tabs to see how data sync across them. Also feel free to edit this code:
+Try opening this page in two tabs to see how data sync across them:
 
 [ embedded codesandbox here ]
 
@@ -18,9 +18,9 @@ Open this page in two tabs to see how data sync across them. Also feel free to e
 
 #### 1. How long will this data be persisted?
 
-All state under ~1mb will be persisted for at least 48-hours without being tied to an account.
+All state under 1mb will be persisted for 48-hours without being tied to an account.
 
-Obtain your `userId` by logging in:
+To tie your data to your account, first obtain your `userId` by logging in:
 
 ```js
 import { loginMagicLink } from '@compose-run/compose'
@@ -39,7 +39,7 @@ useRealtimeState({
 })
 ```
 
-By linking a piece of named state to your `userId`, you sign yourself up to pay for that state when it exceeds our free limit. You will be able to store a small amount of data (10mb/developer account) for free indefinitely. We will reach out to you via email to upgrade your account or export your data if you exceed that limit.
+By linking a piece of named state to your `userId`, you sign yourself up to pay for that state when it exceeds our free limit. You will be able to store a small amount of data (10mb/developer account) on your account for free indefinitely. We will reach out to you via email to upgrade your account or export your data if you exceed that limit.
 
 #### 2. How do I see & debug the current value of the state?
 
