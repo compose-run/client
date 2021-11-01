@@ -18,49 +18,43 @@ Like `useState`, `useRealtimeState` is for maintaining simple state. By default,
 
 #### 1. How long will this data be persisted?
 
-All data will be persisted for 48-hours without creating a developer account.
+All state under ~1mb will be persisted for at least 48-hours without creating a developer account.
 
 You can create a developer account the same way you'd create a user account:
 
 ```js
 import { loginMagicLink } from '@compose-run/compose'
 
-loginMagicLink('your_email@gmail.com').then(console.log)
+loginMagicLink('your_email@gmail.com').then(({userId}) => console.log(userId))
 ```
 
-This will log your user data to the console, including your `userId`. You can use it like this:
+After clicking on the magic link in your inbox, you'll see your `userId` in the console. Add it to the `developer` field like this:
 
 ```js
-useRealtimeState({name: 'test-state', initialState: [], developerUserId: 'YOUR-USERID-HERE')
+useRealtimeState({name: 'test-state', initialState: [], developer: 'your-userId-here')
 ```
 
-This links this piece of state to your developer account. You will be able to store a small amount of data (~10mb/developer account) for free indefinitely, and we will reach out to you via email to upgrade your account or export your data if you exceed that limit.
+This links this piece of state to your account. You will be able to store a small amount of data (~10mb/developer account) for free indefinitely, and we will reach out to you via email to upgrade your account or export your data if you exceed that limit.
 
 #### 2. Can I make realtime state private?
 
-By default, anyone can get or set realtime state via its `name`. If you pass `private: true` to `useState`, then it will create a private piece of state for every user that can only be read or written to when logged in. For example:
+By default, anyone can get or set realtime state via its `name`. If you only want a known subset of users to be able to read or write, simply pass their `userId`s via `readers` and `writers`. For example:
 
 ```js
-useRealtimeState({name: 'test-state, initialState: [], private: true})
+// allow `some-user-id` to read or write but `another-user-id` to only read
+// nobody else can read or write
+useRealtimeState({name: 'some-user-id/private state', initialState: [], readers: ['some-user-id', 'another-user-id'], writers: ['some-user-id']})
 ```
 
 Read about how to log in a user below in **Authenticating Users**.
 
-#### 3. Can I disallow invalid or unathorized edits to the state?
+Soon, you will be able to write more complex authorization & validation logic via **`useRealtimeReducer`**.
 
-Currently the only way to do this is by passing `private: true` to useRealtimeState. For example:
+#### 3. How much data can I store with `useRealtimeState`?
 
-```js
-useRealtimeState({name: 'test-state, initialState: [], private: true})
-```
+Each `name` shouldn't hold more than [**25,000 records (3.87MB)** because all state needs to fit into your user's browser](https://joshzeigler.com/technology/web-development/how-big-is-too-big-for-json). This limitation will be lifted when we launch **`useRealtimeQuery`**.
 
-Soon, you will be able to write your own validation logic via **`useRealtimeReducer`**.
-
-#### 4. How much data can I store with `useRealtimeState`?
-
-Each `name` shouldn't hold more than [**25,000 records (3.87MB)** because all state needs to fit into your user's browser](https://joshzeigler.com/technology/web-development/how-big-is-too-big-for-json). 
-
-#### 5. What happens if two people set the state simultaneously?
+#### 4. What happens if two people set the state simultaneously?
 
 * `onConflict: 'merge` (default)
 * `onConflict: 'last-write-wins'`
@@ -92,18 +86,36 @@ Compose doesn't allow any offline editing. We may add a CRDT mode in the future 
 
 Compose currently only offers magic link login, where users supply their email address, and login via clicking the link sent to their inbox.
 
-```TODO - full example with login form and logout button```
+```js
+import { loginMagicLink, useCurrentUser, awaitingMagicLink } from '@compose-run/compose'
 
-Once users are logged in, they are able to access `private` state.
+export default LoginOrCreateAccount() {
+  const currentUser = useCurrentUser()
+  const [loggingIn, setLoggingIn] = useState(false)
+  
+  
+  if (currentUser) {
+    window.location.href = '/home'
+  }
+  
+  return (
+    <div>
+      Login via magic link
+      <input type="email" onKeyPress={(e} => e.key === Enter && loginMagicLink(e.target.value) disabled={awaitingMagicLink} />
+      { awaitingMagicLink && <div>Check your inbox for the magic link</div> }
+    </div>
+  );
+}
+```
 
 ## `useRealtimeReducer` - _coming soon_
 
 ![](https://user-images.githubusercontent.com/2288939/139447266-d986daa8-2c49-4a9d-aed9-283abbf89864.png)
 
-Like `useReducer`, `useRealtime` is for maintaining more complex state. By default, it syncs the state across all instances of the same `name` for all users.
+Like `useReducer`, `useRealtime` is for maintaining more complex state. By default, it syncs the state across all instances of the same `name` for all users. It allows you to supply a `reducer` function that _runs on the server_ to handle complex state update logic.
 
 
 ## `useRealtimeQuery` - _coming soon_
 
-`useRealtimeQuery` 
+`useRealtimeQuery` will enable you to store more data at a `name` than can fit in the user's browser by allowing you to filter it _on the server_ before sending it to the client.
 
