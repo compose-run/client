@@ -230,8 +230,8 @@ Like `useReducer`, `useRealtime` is for maintaining more complex state. By defau
 
 ## Pricing 
 
-10mb - free
-1gb - $9 / month
-100gb - $10 / month
-1tb - $24 / month
+* 10mb - free
+* 1gb - $9 / month
+* 100gb - $10 / month
+* 1tb - $24 / month
 
