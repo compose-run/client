@@ -2,17 +2,17 @@
 
 _A whole backend without leaving React_
 
-ComposeJS provides realtime & persistent versions of the React hooks you already know. Authentication & realtime-updates built-in.
+Realtime & persistent versions of the React hooks you already know. Authentication & realtime built-in. 100% severless. Get started in seconds.
 
-[ GIF here ]
+![](https://user-images.githubusercontent.com/2288939/139447267-76a76bf7-f964-4f80-9c44-dd008e74fd8f.png)
 
 ## `useState`
 
 Like `useState`, `useRealtimeState` is for maintaining simple state. By default, it syncs the state across all instances of the same `name` for all users.
 
-![](https://user-images.githubusercontent.com/2288939/139447267-76a76bf7-f964-4f80-9c44-dd008e74fd8f.png)
+Open this page in two tabs to see how data sync across them. Also feel free to edit this code:
 
-[Try it out here!](TODO)
+[ embedded codesandbox here that encourages you to open in a new tab ]
 
 ### FAQ
 
