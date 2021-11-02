@@ -219,7 +219,7 @@ useEffect(() => setPublicMirror(privateState), [privateState])
 
 A clever user can read your source and set your state in unexpected ways, so it's good practice to validate your data and try to recover from invalid writes as best you can. Below is an example using the `zod` parsing library:
 
-```
+```js
 import * as zod from 'zod'
 
 const messagesSchema = zod.array(zod.string())
