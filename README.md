@@ -44,9 +44,11 @@ It returns an array of two values, used to get and set the value of state:
 
 ### FAQ
 
-#### 1. How long will this data be persisted?
+#### How long will this data be persisted?
 
-All state under 1mb will be persisted for 48-hours without being link to an account. 
+All state under 1mb will be persisted for 48-hours without being link to an account. Give it a spin, go win a hackathon – without even signing up.
+
+#### How do I persist data longer than 48 hours?
 
 To link state to your account, add `developer: 'your-userId-here'` to the state:
 
@@ -72,7 +74,61 @@ After clicking on the magic link in your inbox, copy your `userId` from the cons
 
 By linking a piece of state to your `userId`, you sign yourself up to pay for that state when it exceeds our free limit. You will be able to store a small amount of data (10mb/developer account) on your account for free indefinitely. We will reach out to you via email to upgrade your account or export your data if you exceed that limit.
 
-#### 2. How do I see & debug the current value of the state?
+#### What if someone else signs me up to pay for state I don't want to pay for?
+
+When you (or someone else) adds your `userId` under the `developer` field of the state, we will add that state to your tab in much the same way that you would charge a drink to your hotel room. 
+
+Before we charge your bill,  we will confirm the all the state `name`s that linked to your account, and allow you to remove any that you do not wish to maintain.
+
+We plan to soon allow you to explicitly register names that you wish to maintain. For example, you could pemit users of your app to maintain certain kinds of named state, and automatically disallow any other state attempting to be linked to your account.
+
+#### What kind of state can I store?
+
+You can store any JSON object.
+
+We eventually plan to support other JavaScript types, such as `Set` and `File`.
+
+#### How should I organize my state?
+
+We advise against nesting your data. 
+
+We recommend that you store your data in flat, normalized `Array`s and link between objects via their IDs:
+
+```jsx
+import { useRealtimeState, uuid, ServerTimestamp, useCurrentUser } from '@compose-run/compose'
+
+
+function ChatApp() {
+  const currentUser = useCurrentUser()
+
+  const [messages, setMessages] = useRealtimeState({
+    name: 'CHANGE-ME/messages',
+    initialState: []
+  })  
+
+  function sendMessage(newMessageText) {
+    setMessages([
+      ...messages,
+      { 
+        id: uuid(), 
+        text: newMessageText, 
+        author: currentUser.id
+        createdAt: ServerTimestamp,  
+      }
+    ])
+  }
+  
+  return <div> { /* render messages & use sendMessage here */ } </div>
+}
+```
+
+#### How much data can I store?
+
+Each `name` shouldn't hold more than **25,000 records (3.87MB)** because all state needs to [fit into your user's browser](https://joshzeigler.com/technology/web-development/how-big-is-too-big-for-json). 
+
+This limitation will be lifted when we launch **`useRealtimeQuery`** (_coming soon_).
+
+#### How do I see & debug the current value of the state?
 
 You can print out changes to realtime state from within a React component:
 
@@ -93,7 +149,7 @@ const testState = await getRealtimeState({name: 'test-state'})
 console.log(testState)
 ```
 
-#### 3. Is data namespaced or all global?
+#### Is data namespaced or all global?
 
 Data is global by default, but you can add your own namespace via `/`s. If you add a user's `userId`s in the `name` path, it will allow that user to read and write the state. If the `name` has no `userId`s in its path, it will be globally readable and writable.
 
@@ -106,7 +162,7 @@ useRealtimeState({
 })
 ```
 
-#### 4. Can I make realtime state private?
+#### Can I make realtime state private?
 
 By default, anyone can get or set realtime state via its `name`. You can make a state private by nesting it under a `userId` (obtained after authenticating them):
 
@@ -133,7 +189,7 @@ You can nest arbitrarily many `userId`s like this to create a piece of state tha
 
 You will be able to write more complex authorization & validation logic via **`useRealtimeReducer`** (_coming soon_).
 
-#### 5. How do I make my app reslient to invalid writes?
+#### How do I make my app reslient to invalid writes?
 
 A clever user can read your source and set your state in unexpected ways, so it's good practice to validate your data and try to recover from invalid writes as best you can. Below is an example using the `zod` parsing library:
 
@@ -163,13 +219,7 @@ useEffect(() => {
 
 ```
 
-#### 6. How much data can I store with `useRealtimeState`?
-
-Each `name` shouldn't hold more than **25,000 records (3.87MB)** because all state needs to [fit into your user's browser](https://joshzeigler.com/technology/web-development/how-big-is-too-big-for-json). 
-
-This limitation will be lifted when we launch **`useRealtimeQuery`** (_coming soon_).
-
-#### 7. What happens if two people set the state simultaneously?
+#### What happens if two people set the state simultaneously?
 
 * `onConflict: 'merge` (default)
 * `onConflict: 'last-write-wins'`
@@ -222,17 +272,9 @@ setTest(['a', 'c']) // throws exception
 // test == ['a', 'b']
 ```
 
-#### 8. Does it work offline?
+#### Does it work offline?
 
 Compose doesn't allow any offline editing. We may add a CRDT mode in the future which would enable offline edits.
-
-#### 9. What if someone else signs me up to pay for state I don't want to pay for?
-
-When you (or someone else) adds your `userId` under the `developer` field of the state, we will add that state to your tab in much the same way that you would charge a drink to your hotel room. 
-
-Before we charge your bill,  we will confirm the all the state `name`s that linked to your account, and allow you to remove any that you do not wish to maintain.
-
-We plan to soon allow you to explicitly register names that you wish to maintain. For example, you could pemit users of your app to maintain certain kinds of named state, and automatically disallow any other state attempting to be linked to your account.
 
 ## Authenticating Users
 
