@@ -46,7 +46,7 @@ It returns an array of two values, used to get and set the value of state:
 
 ### Example Todo App
 
-```
+```js
 import { loginMagicLink, useCurrentUser, awaitingMagicLink, uuid, logout } from '@compose-run/compose'
 
 function Login() {
