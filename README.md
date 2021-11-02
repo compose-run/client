@@ -185,9 +185,33 @@ useRealtimeState({
 })
 ```
 
-You can nest arbitrarily many `userId`s like this to create a piece of state that those users will be able to read and write together. The order of the `userId`s doesn't matter.
+You can nest arbitrarily many `userId`s like this to create a piece of state that those users will be able to read and write together. Imagine a private folder on a user's computer. Now imagine creating another folder nested inside that one and giving another user access to the inner folder:
+
+```
+/user-1 (only user-1 can read and write)
+  /user-2 (user-1 and user-2 can read and write)
+    /user-3 (user-1, user-2, and user-3 can read and write)
+```
 
 You will be able to write more complex authorization & validation logic via **`useRealtimeReducer`** (_coming soon_).
+
+#### Can I make writes private but reads public?
+
+Currently you can hack this by syncing private state to a public name:
+
+```js
+const [ privateState, setPrivateState ] = userRealtimeState({
+  name: `${currentUser.id}/my-state`,
+  initialValue: 'only I can change this'
+})
+
+const [publicMirror, setPublicMirror ] = useRealtimeState({
+  name: `${currentUser.id}-my-state`
+  initialValue: privateState
+})
+
+useEffect(() => setPublicMirror(privateState), [privateState])
+```
 
 #### How do I make my app reslient to invalid writes?
 
