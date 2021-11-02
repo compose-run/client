@@ -86,7 +86,7 @@ We plan to soon allow you to explicitly register names that you wish to maintain
 
 #### What kind of state can I store?
 
-You can store any JSON object.
+You can store any JSON object. We reccomend that each piece of state be an `Array` of flat objects, much like a SQL table.
 
 We eventually plan to support other JavaScript types, such as `Set` and `File`.
 
