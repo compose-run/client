@@ -9,7 +9,7 @@ _A whole backend without leaving React_
 
 ![](https://user-images.githubusercontent.com/2288939/139447267-76a76bf7-f964-4f80-9c44-dd008e74fd8f.png)
 
-TODO: fix the import path to '@compose-run/compose' & switch all "server"s to "cloud"
+> TODO: fix the import path to '@compose-run/compose' & switch all "server"s to "cloud"
 
 ## `useRealtimeState`
 
@@ -17,7 +17,7 @@ Where `useState` is like a variable that holds state within a React Component, `
 
 Try opening this page in two tabs to see how data sync across them:
 
-[ TODO - embedded codesandbox here ]
+> TODO - embedded codesandbox here 
 
 ### API
 
@@ -45,6 +45,8 @@ It returns an array of two values, used to get and set the value of state:
 * The second value is used to set the state across all references to that `name` – for all users.
 
 ### Example Todo App
+
+> TODO - video programming this live & code sandbox instead of embedded code
 
 ```js
 import { loginMagicLink, useCurrentUser, awaitingMagicLink, uuid, logout } from '@compose-run/compose'
