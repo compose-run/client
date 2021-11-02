@@ -296,6 +296,8 @@ const [publicMirror, setPublicMirror ] = useRealtimeState({
 useEffect(() => setPublicMirror(privateState), [privateState])
 ```
 
+We will have first-class support for this use-case with **`useRealtimeQuery`** (_coming soon_).
+
 #### How do I make my app reslient to invalid writes?
 
 A clever user can read your source and set your state in unexpected ways, so it's good practice to validate your data and try to recover from invalid writes as best you can. Below is an example using the `zod` parsing library:
