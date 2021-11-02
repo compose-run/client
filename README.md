@@ -9,6 +9,8 @@ _A whole backend without leaving React_
 
 ![](https://user-images.githubusercontent.com/2288939/139447267-76a76bf7-f964-4f80-9c44-dd008e74fd8f.png)
 
+TODO: fix the import path to '@compose-run/compose' & switch all "server"s to "cloud"
+
 ## `useRealtimeState`
 
 Where `useState` is like a variable that holds state within a React Component, `useRealtimeState` is like a cloud variable that syncs state across all instances of the same `name` parameter – for all users.
