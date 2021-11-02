@@ -2,13 +2,16 @@
 
 _A whole backend without leaving React_
 
-Realtime & persistent versions of the React hooks you already know. 100% severless. Authentication & realtime built-in. Get started in seconds.
+* Realtime & persistent versions of the React hooks you already know. 
+* 100% Severless. 
+* Authentication & realtime built-in. 
+* Get started in seconds.
 
 ![](https://user-images.githubusercontent.com/2288939/139447267-76a76bf7-f964-4f80-9c44-dd008e74fd8f.png)
 
-## `useState`
+## `useRealtimeState`
 
-Like `useState`, `useRealtimeState` is for maintaining simple state. By default, it syncs the state across all instances of the same `name` for all users.
+Where `useState` is like a variable that holds state within a React Component, `useRealtimeState` is like a cloud variable that syncs state across all instances of the same `name` parameter – for all users.
 
 Try opening this page in two tabs to see how data sync across them:
 
@@ -18,18 +21,9 @@ Try opening this page in two tabs to see how data sync across them:
 
 #### 1. How long will this data be persisted?
 
-All state under 1mb will be persisted for 48-hours without being tied to an account.
+All state under 1mb will be persisted for 48-hours without being link to an account. 
 
-To tie your data to your account, first obtain your `userId` by logging in:
-
-```js
-import { loginMagicLink } from '@compose-run/compose'
-
-loginMagicLink('your_email@gmail.com')
-  .then(({userId}) => console.log(userId))
-```
-
-After clicking on the magic link in your inbox, you'll see your `userId` in the console. Add it to the `developer` field like this:
+To link state to your account, add `developer: 'your-userId-here'` to the state:
 
 ```js
 useRealtimeState({
@@ -39,23 +33,36 @@ useRealtimeState({
 })
 ```
 
+To obtain your `userId`, login via your email address and print it to the console:
+
+```js
+import { loginMagicLink } from '@compose-run/compose'
+
+const { userId } = await loginMagicLink('your-email@gmail.com')
+
+console.log(userId)
+```
+
+After clicking on the magic link in your inbox, copy your `userId` from the console.
+
 By linking a piece of named state to your `userId`, you sign yourself up to pay for that state when it exceeds our free limit. You will be able to store a small amount of data (10mb/developer account) on your account for free indefinitely. We will reach out to you via email to upgrade your account or export your data if you exceed that limit.
 
 #### 2. How do I see & debug the current value of the state?
 
-You can print out changes to some `state` from within a React component:
+You can print out changes to realtime state from within a React component:
 
 ```js
-const [state, setState] = useRealtimeState({name: 'test-state', initialState: []})
+const [testState, setTestState] = useRealtimeState({name: 'test-state', initialState: []})
 
-useEffect(() => console.log(state), [state])
+useEffect(() => console.log(testState), [testState])
 ```
 
-You can also get the current value of the state via a `Promise` and log it:
+You can also get the current value of the state as a `Promise` and log it:
 
 ```js
-getRealtimeState({name: 'test-state'})
-  .then(console.log)
+const testState = await getRealtimeState({name: 'test-state'})
+
+console.log(testState)
 ```
 
 #### 3. Is data namespaced or all global?
@@ -184,6 +191,14 @@ setTest(['a', 'c']) // throws exception
 #### 8. Does it work offline?
 
 Compose doesn't allow any offline editing. We may add a CRDT mode in the future which would enable offline edits.
+
+#### 9. What if someone else signs me up to pay for state I don't want to pay for?
+
+When you (or someone else) adds your `userId` under the `developer` field of the state, we will add that state to your tab in much the same way that you would charge a drink to your hotel room. 
+
+Before we charge your bill,  we will confirm the all the state `name`s that linked to your account, and allow you to remove any that you do not wish to maintain.
+
+We plan to soon allow you to explicitly register names that you wish to maintain. For example, you could pemit users of your app to maintain certain kinds of named state, and automatically disallow any other state attempting to be linked to your account.
 
 ## Authenticating Users
 
