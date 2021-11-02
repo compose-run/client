@@ -45,14 +45,17 @@ console.log(userId)
 
 After clicking on the magic link in your inbox, copy your `userId` from the console.
 
-By linking a piece of named state to your `userId`, you sign yourself up to pay for that state when it exceeds our free limit. You will be able to store a small amount of data (10mb/developer account) on your account for free indefinitely. We will reach out to you via email to upgrade your account or export your data if you exceed that limit.
+By linking a piece of state to your `userId`, you sign yourself up to pay for that state when it exceeds our free limit. You will be able to store a small amount of data (10mb/developer account) on your account for free indefinitely. We will reach out to you via email to upgrade your account or export your data if you exceed that limit.
 
 #### 2. How do I see & debug the current value of the state?
 
 You can print out changes to realtime state from within a React component:
 
 ```js
-const [testState, setTestState] = useRealtimeState({name: 'test-state', initialState: []})
+const [testState, setTestState] = useRealtimeState({
+  name: 'test-state', 
+  initialState: []
+})
 
 useEffect(() => console.log(testState), [testState])
 ```
@@ -92,7 +95,7 @@ useRealtimeState({
 })
 ```
 
-Not even you, the developer, will be able to read or write this state. You can add yourself as a reader & writer by adding your `userId` to the path:
+Not even you, the developer, will be able to read or write this state. You can add yourself as a reader & writer to your user's state by adding your own `userId` to the path:
 
 ```js
 useRealtimeState({
@@ -101,13 +104,13 @@ useRealtimeState({
 })
 ```
 
-You can nest arbitrarily many `userId`s like this to create a piece of state that those users can all read and write together. The order of the `userId`s doesn't matter for access control.
+You can nest arbitrarily many `userId`s like this to create a piece of state that those users will be able to read and write together. The order of the `userId`s doesn't matter.
 
 You will be able to write more complex authorization & validation logic via **`useRealtimeReducer`** (_coming soon_).
 
 #### 5. How do I make my app reslient to invalid writes?
 
-A clever user can set your state in unexpected ways, so it's good practice to validate your data and try to recover from invalid writes as best you can. Below is an example using the `zod` parsing library:
+A clever user can read your source and set your state in unexpected ways, so it's good practice to validate your data and try to recover from invalid writes as best you can. Below is an example using the `zod` parsing library:
 
 ```
 import * as zod from 'zod'
@@ -121,9 +124,15 @@ const [ messages, setMessages ] = useRealtimeState({
 
 useEffect(() => {
   try {
+    // validate messages is an array of strings
     messagesSchema.parse(messages)
-  } catch (e) 
-    setMessages([])
+  } catch (e)
+    // try to filter out anything but strings
+    // or reset to the empty list
+    setMessages(Array.isArray(messages)
+      ? messages.filter(m => typeof m === 'string') 
+      : []
+    )
   }
 }, [messages])  
 
