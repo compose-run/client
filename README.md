@@ -44,6 +44,87 @@ It returns an array of two values, used to get and set the value of state:
 * The first value represents the current value of the state. It is `null` while the state is loading.
 * The second value is used to set the state across all references to that `name` – for all users.
 
+### Example Todo App
+
+```
+import { loginMagicLink, useCurrentUser, awaitingMagicLink, uuid, logout } from '@compose-run/compose'
+
+function Login() {
+  const currentUser = useCurrentUser()
+  if (currentUser) {
+    return <TodoList />
+  }
+
+  return (
+    <div>
+      Login via magic link
+      <input 
+        type="email" 
+        onKeyPress={(e) => e.key === Enter && loginMagicLink(e.target.value)} 
+        disabled={awaitingMagicLink} 
+      />
+      { awaitingMagicLink && 
+          <div>Check your inbox for the magic link</div> 
+      }
+    </div>
+  );
+}
+
+function TodoList() {
+  const currentUser = useCurrentUser()
+  if (!currentUser) {
+    return <Login />
+  }
+
+  const [ todos, setTodos ] = useRealtimeState({
+    name: `/${currentUser.id}/todos`,
+    initialState: []
+  })
+
+  function newTodo(text) {
+    setTodos([...todos, {text: e.target.value, completed: false, id: uuid()}])
+  }
+
+  function toggleTodo(id) {
+    setTodos(todos.map(todo => todo.id === id ? {...todo, completed: !todo.completed} : todo))
+  }
+
+  function deleteTodo(id) {
+    setTodos(todos.filter(todo => todo.id !== id))
+  }
+
+  return (
+    <div>
+      <div>
+        <div>{currentUser.email}</div>
+        <div><button onClick={() => logout()}>Logout</button></div>
+      </div>  
+      <h1>Todo List</h1>
+      <ul>
+        {todos.map((todo) => (
+          <li key={todo.id}>
+            <button onClick={deleteTodo(todo.id)}>
+              X
+            </button>
+            <input 
+              type="checkbox" 
+              value={todo.completed} 
+              onClick={toggleTodo(todo.id)
+            }/>
+            {todo.text}
+          </li>
+        ))}
+      </ul>
+      <input onKeyPress={(e) => e.key === Enter && newTodo(e.target.value)} />
+    </div>
+  );
+}
+
+export function App() {
+  return <Login />
+}
+```
+
 ### FAQ
 
 #### How long will this data be persisted?
@@ -309,21 +390,18 @@ Compose currently only offers magic link login, where users supply their email a
 ```js
 import { loginMagicLink, useCurrentUser, awaitingMagicLink } from '@compose-run/compose'
 
-export default LoginOrCreateAccount() {
+function Login() {
   const currentUser = useCurrentUser()
-  const [loggingIn, setLoggingIn] = useState(false)
-  
-  
   if (currentUser) {
-    window.location.href = '/home'
+    return <Home />
   }
-  
+
   return (
     <div>
       Login via magic link
       <input 
         type="email" 
-        onKeyPress={(e} => e.key === Enter && loginMagicLink(e.target.value)} 
+        onKeyPress={(e) => e.key === Enter && loginMagicLink(e.target.value)} 
         disabled={awaitingMagicLink} 
       />
       { awaitingMagicLink && 
