@@ -2,9 +2,9 @@
 
 _A whole backend without leaving React_
 
-* Realtime & persistent versions of the React hooks you already know. 
-* 100% Severless. 
-* Authentication & realtime built-in. 
+* Realtime & persistent versions of the React hooks you already know
+* 100% Severless
+* Authentication & realtime built-in
 * Get started in seconds – no account required
 
 ![](https://user-images.githubusercontent.com/2288939/139447267-76a76bf7-f964-4f80-9c44-dd008e74fd8f.png)
