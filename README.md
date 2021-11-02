@@ -33,9 +33,9 @@ useRealtimeState<State>({
 
 `useRealtimeState` requires two named arguments and one optional named argument:
 
-* `name` is a globally unique identifier string.
-* `initialState` is the initial value for the state; can be an JSON object
-* `developer` is the `userId` for the application's developer (that's you!). If it is not supplied, the state is limited to 1mb and will only last 48 hours.
+* `name` (_required_) is a globally unique identifier string. 
+* `initialState` (_required_) is the initial value for the state; can be an JSON object. 
+* `developer` (_optional_) is the `userId` for the application's developer (that's you!). If it is not supplied, the state is limited to 1mb and will only last 48 hours. 
 
 It returns an array of two values, used to get and set the value of state:
 
