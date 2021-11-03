@@ -49,12 +49,19 @@ It returns an array of two values, used to get and set the value of state:
 > TODO - video programming this live & code sandbox instead of embedded code
 
 ```js
-import { loginMagicLink, useCurrentUser, awaitingMagicLink, uuid, logout } from '@compose-run/compose'
+import { loginMagicLink, useCurrentUser, useRealtimeState, uuid, logout } from '@compose-run/compose'
 
 function Login() {
   const currentUser = useCurrentUser()
   if (currentUser) {
     return <TodoList />
+  }
+  
+  const [ loggingIn, setLoggingIn ] = useState(false)
+  
+  function login(email) {
+    setLoggingIn(true)
+    loginMagicLink(e.target.value)
   }
 
   return (
@@ -62,10 +69,10 @@ function Login() {
       Login via magic link
       <input 
         type="email" 
-        onKeyPress={(e) => e.key === Enter && loginMagicLink(e.target.value)} 
-        disabled={awaitingMagicLink} 
+        onKeyPress={(e) => e.key === Enter && login(e.target.value)} 
+        disabled={loggingIn} 
       />
-      { awaitingMagicLink && 
+      { loggingIn && 
           <div>Check your inbox for the magic link</div> 
       }
     </div>
@@ -392,12 +399,18 @@ Compose doesn't allow any offline editing. We may add a CRDT mode in the future 
 Compose currently only offers magic link login, where users supply their email address, and login via clicking the link sent to their inbox.
 
 ```js
-import { loginMagicLink, useCurrentUser, awaitingMagicLink } from '@compose-run/compose'
+import { loginMagicLink, useCurrentUser } from '@compose-run/compose'
 
 function Login() {
   const currentUser = useCurrentUser()
   if (currentUser) {
     return <Home />
+  }
+  
+  const [ loggingIn, setLoggingIn ] = useState(false)
+  function login(email) {
+    setLoggingIn(true)
+    loginMagicLink(e.target.value)
   }
 
   return (
@@ -405,10 +418,10 @@ function Login() {
       Login via magic link
       <input 
         type="email" 
-        onKeyPress={(e) => e.key === Enter && loginMagicLink(e.target.value)} 
-        disabled={awaitingMagicLink} 
+        onKeyPress={(e) => e.key === Enter && login(e.target.value)}
+        disabled={loggingIn}
       />
-      { awaitingMagicLink && 
+      { loggingIn && 
           <div>Check your inbox for the magic link</div> 
       }
     </div>
