@@ -302,7 +302,7 @@ export function magicLinkLogin({
   });
 }
 
-export function useUser() {
+export function useUser(): User | null {
   const [user, setUser] = useState<User | null>(loggedInUser);
   useEffect(() => {
     loggedInUserSubscriptions.add(setUser);

@@ -2,15 +2,39 @@
 
 ## _A whole backend without leaving React_
 
-Compose is a Firebase-alternative for React. Code your backend from your frontend.
+Compose is a modern Firebase-alternative for React apps, featuring:
 
-- Cloud functions deployed on every save
-- Realtime & persistent versions of the React hooks you already ❤️
+- cloud functions deployed on every save
+- cloud versions of the react hooks you already 💖
   - `useState` -> `useCloudState`
   - `useReducer` -> `useCloudReducer`
-- Authentication & realtime web sockets built-in
-- Get started in seconds
+- authentication & realtime web sockets built-in
+- get started in seconds
 - 100% serverless
+- typescript bindings
+
+## Getting started
+
+TODO
+
+## Example App
+
+The Compose Community chat app is built on Compose. [Check out the code](https://github.com/compose-run/community) and [join the conversation](https://community.compose.run)!
+
+## API
+
+- State
+  - `useCloudState`
+  - `useCloudReducer`
+- Users & Authentication
+  - `magicLinkLogin`
+  - `useUser`
+- Utilities
+  - `getCloudState`
+  - `setCloudState`
+  - `dispatchCloudAction`
+
+# State
 
 ## `useCloudState`
 
@@ -20,33 +44,43 @@ Where `useState` is a variable that holds state within a React Component, `useCl
 useCloudState<State>({
   name,
   initialState,
-  developer
 }: {
   name: string,
   initialState: State,
-  developer?: string,
 }) : [State | null, (State) => void]
 ```
 
-`useCloudState` requires two named arguments and one optional named argument:
+`useCloudState` requires two named arguments:
 
 - `name` (_required_) is a globally unique identifier string.
 - `initialState` (_required_) is the initial value for the state; can be an JSON object.
 
 It returns an array of two values, used to get and set the value of state:
 
-- The first value represents the current value of the state. It is `null` while the state is loading.
-- The second value is used to set the state across all references to that `name` – for all users.
+1. The current value of the state. It is `null` while the state is loading.
+2. A function to set the state across all references to the `name` parameter.
+
+### Example usage
+
+- TODO
 
 ## `useCloudReducer`
 
 Like `useReducer`, `useCloudReducer` is for maintaining complex state. It allows you to supply a `reducer` function that _runs on the server_ to handle state update logic. For example, your reducer can disallow invalid or unauthenticated updates.
 
-## `useCloudQuery` - _coming soon_
+### Example usage
 
-`useCloudQuery` will enable you to store more data at a `name` than can fit in the user's browser by allowing you to filter it _on the server_ before sending it to the client.
+- TODO
 
-## Authentication & Users
+# Users & Authentication
+
+TODO
+
+## `User`
+
+TODO
+
+## `magicLinkLogin`
 
 Login users to your app via magic link.
 
@@ -62,139 +96,45 @@ export function magicLinkLogin({
 }): Promise<User>;
 ```
 
-### Example
+### Example usage
 
-```js
-import { magicLinkLogin, useCurrentUser } from "@compose-run/compose-client";
+- TODO
 
-function Login() {
-  const currentUser = useCurrentUser();
-  if (currentUser) {
-    return <Home />;
-  }
+## `useUser`
 
-  const [loggingIn, setLoggingIn] = useState(false);
-  function login(email) {
-    setLoggingIn(true);
-    magicLinkLogin(e.target.value);
-  }
+`useUser` is a React hook to get the current user. It either returns the current user or `null` if no user is not logged in.
 
-  return (
-    <div>
-      Login via magic link
-      <input
-        type="email"
-        onKeyPress={(e) => e.key === Enter && login(e.target.value)}
-        disabled={loggingIn}
-      />
-      {loggingIn && <div>Check your inbox for the magic link</div>}
-    </div>
-  );
-}
+```ts
+useUser(): User | null
 ```
 
-### Example Todo App
+### Example usage
 
-```js
-import {
-  magicLinkLogin,
-  useCurrentUser,
-  useCloudState,
-  uuid,
-  logout,
-} from "@compose-run/compose";
+- TODO
 
-function Login() {
-  const currentUser = useCurrentUser();
-  if (currentUser) {
-    return <TodoList />;
-  }
+# Utilities
 
-  const [loggingIn, setLoggingIn] = useState(false);
+## `getCloudState`
 
-  function login(email) {
-    setLoggingIn(true);
-    magicLinkLogin(e.target.value);
-  }
+### Example usage
 
-  return (
-    <div>
-      Login via magic link
-      <input
-        type="email"
-        onKeyPress={(e) => e.key === Enter && login(e.target.value)}
-        disabled={loggingIn}
-      />
-      {loggingIn && <div>Check your inbox for the magic link</div>}
-    </div>
-  );
-}
+- TODO
 
-function TodoList() {
-  const currentUser = useCurrentUser();
-  if (!currentUser) {
-    return <Login />;
-  }
+## `setCloudState`
 
-  const [todos, setTodos] = useCloudState({
-    name: `/${currentUser.id}/todos`,
-    initialState: [],
-  });
+### Example usage
 
-  function newTodo(text) {
-    setTodos([
-      ...todos,
-      { text: e.target.value, completed: false, id: uuid() },
-    ]);
-  }
+- TODO
 
-  function toggleTodo(id) {
-    setTodos(
-      todos.map((todo) =>
-        todo.id === id ? { ...todo, completed: !todo.completed } : todo
-      )
-    );
-  }
+## `dispatchCloudAction`
 
-  function deleteTodo(id) {
-    setTodos(todos.filter((todo) => todo.id !== id));
-  }
+### Example usage
 
-  return (
-    <div>
-      <div>
-        <div>{currentUser.email}</div>
-        <div>
-          <button onClick={() => logout()}>Logout</button>
-        </div>
-      </div>
-      <h1>Todo List</h1>
-      <ul>
-        {todos.map((todo) => (
-          <li key={todo.id}>
-            <button onClick={deleteTodo(todo.id)}>X</button>
-            <input
-              type="checkbox"
-              value={todo.completed}
-              onClick={toggleTodo(todo.id)}
-            />
-            {todo.text}
-          </li>
-        ))}
-      </ul>
-      <input onKeyPress={(e) => e.key === Enter && newTodo(e.target.value)} />
-    </div>
-  );
-}
+- TODO
 
-export function App() {
-  return <Login />;
-}
-```
+# FAQ
 
-### FAQ
-
-#### What kind of state can I store?
+## What kind of state can I store?
 
 You can store any JSON object.
 
@@ -225,7 +165,7 @@ const [testState, setTestState] = useCloudState({
 useEffect(() => console.log(testState), [testState]);
 ```
 
-#### Does it work offline?
+## Does it work offline?
 
 Compose doesn't allow any offline editing. We may add a CRDT mode in the future which would enable offline edits.
 
@@ -247,11 +187,9 @@ Compose doesn't allow any offline editing. We may add a CRDT mode in the future 
 
 There are just two files, really:
 
-- `shared-types.ts`, which is just a symlink from `compose-node/src/shared-types.ts`
 - `index.ts`, which contains the whole library
+- `shared-types.ts`, which contains all the types that are shared between the client and server
 
 ## Running & Testing
 
-Currently the way I run & test this library is in the context of the `compose-community` project. The `npm run build` command (which you need to run in this directory, not the top-level directory) will compile and sync the built version of the library to `compose-community`. (Unfortunately I haven't yet found a way to export the types to that repo, so you may have to recreate them there manually. Hopefully this will be solved when we package up this client library as a proper npm module.)
-
-Of course we'll also eventually want tests in this repo itself, but for now, I think simply using the library ourselves in `compose-community` is sufficient to catch most of the bugs.
+Currently the way I run & test this library is in the context of the `compose-community` project. The `npm run build` command will compile and sync the built version of the library to `compose-community`. (Unfortunately I haven't yet found a way to export the types to that repo, so you may have to recreate them there manually. Hopefully this will be solved when we package up this client library as a proper npm module.)
