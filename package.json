@@ -3,8 +3,7 @@
   "version": "0.0.5",
   "description": "a whole backend without leaving your react app",
   "source": "index.ts",
-  "main": "dist/main.js",
-  "module": "dist/module.js",
+  "browser": "dist/index.js",
   "types": "dist/types.d.ts",
   "license": "MIT",
   "scripts": {
@@ -20,5 +19,11 @@
   },
   "peerDependencies": {
     "react": "^17.0.2"
-  }
+  },
+  "browserslist": [
+    ">0.2%",
+    "not dead",
+    "not ie <= 11",
+    "not op_mini all"
+  ]
 }
