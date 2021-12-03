@@ -220,3 +220,14 @@ There are just two files, really:
 
 - `index.ts`, which contains the whole library
 - `shared-types.ts`, which contains all the types that are shared between the client and server
+
+## Developing locally
+
+You can use `npm link` if you want to test out changes to this client library in another project locally. For example, let's say we wanted to test out a change to this client library in the `@compose-run/community`repo:
+
+1. In this repo, run `npm link`
+2. In this repo, run `npm link ../@compose-run/community/node_modules/react` [^1]
+3. In `@compose-run/community`, run `npm link @compose-run/client`
+4. In this repo, run `npm run watch`
+
+[1]: This step is to stop React from complain that you're "breaking the rules of hooks" by having "more than one copy of React in the same app". As described in the [React docs](https://reactjs.org/warnings/invalid-hook-call-warning.html#duplicate-react), you can fix this by running
