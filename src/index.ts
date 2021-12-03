@@ -32,7 +32,7 @@ let socketOpen = false;
 let queuedMessages: Request_[] = [];
 
 let socket: WebSocket;
-let composeServerUrl = "ws://api.compose.run";
+let composeServerUrl = "wss://api.compose.run";
 
 //////////////////////////////////////////
 // UTILS
