@@ -1,6 +1,6 @@
 # ComposeJS
 
-## _A whole backend without leaving React_
+### _a whole backend without leaving React_
 
 Compose is a modern Firebase-alternative for React apps, featuring:
 
@@ -13,30 +13,53 @@ Compose is a modern Firebase-alternative for React apps, featuring:
 - 100% serverless
 - typescript bindings
 
-## Getting started
+# Table of Contents
 
-TODO
+- [Example App](#example-app)
+- [Installation](#getting-started)
+  - [Codesandbox Template](#codesandbox-template)
+  - [NPM](#npm)
+- [Tutorial](#tutorial)
+- [API](#api)
+  - [State Hooks](#state)
+    - [`useCloudState`](#usecloudstate)
+    - [`useCloudReducer`](#usecloudreducer)
+  - [State Utilities](#state-utilities)
+    - [getCloudState](#getcloudstate)
+    - [`setCloudState`](#setcloudstate)
+    - [`dispatchCloudAction`](#dispatchcloudaction)
+  - [Users & Authentication](#users--authentication)
+    - [`magicLinkLogin`](#magiclinklogin)
+    - [`useUser`](#useuser)
+- [FAQ](#faq)
 
-## Example App
+# Example App
 
 The Compose Community chat app is built on Compose. [Check out the code](https://github.com/compose-run/community) and [join the conversation](https://community.compose.run)!
 
-## API
+# Installation
 
-- State
-  - `useCloudState`
-  - `useCloudReducer`
-- Users & Authentication
-  - `magicLinkLogin`
-  - `useUser`
-- Utilities
-  - `getCloudState`
-  - `setCloudState`
-  - `dispatchCloudAction`
+## Codesandbox Template
 
-# State
+## Install via npm or yarn
 
-## `useCloudState`
+```
+npm install --save @compose-run/client
+```
+
+or
+
+```
+yarn add @compose-run/client
+```
+
+# Tutorial
+
+# API
+
+## State
+
+### `useCloudState`
 
 Where `useState` is a variable that holds state within a React Component, `useCloudState` is a cloud variable that syncs state across all instances of the same `name` parameter – for all users.
 
@@ -53,34 +76,34 @@ useCloudState<State>({
 `useCloudState` requires two named arguments:
 
 - `name` (_required_) is a globally unique identifier string.
-- `initialState` (_required_) is the initial value for the state; can be an JSON object.
+- `initialState` (_required_) is the initial value for the state; can be any JSON object.
 
 It returns an array of two values, used to get and set the value of state:
 
 1. The current value of the state. It is `null` while the state is loading.
 2. A function to set the state across all references to the `name` parameter.
 
-### Example usage
+#### Example usage
 
 - TODO
 
-## `useCloudReducer`
+### `useCloudReducer`
 
 Like `useReducer`, `useCloudReducer` is for maintaining complex state. It allows you to supply a `reducer` function that _runs on the server_ to handle state update logic. For example, your reducer can disallow invalid or unauthenticated updates.
 
-### Example usage
+#### Example usage
 
 - TODO
 
-# Users & Authentication
+## Users & Authentication
 
 TODO
 
-## `User`
+### `User`
 
 TODO
 
-## `magicLinkLogin`
+### `magicLinkLogin`
 
 Login users to your app via magic link.
 
@@ -96,11 +119,11 @@ export function magicLinkLogin({
 }): Promise<User>;
 ```
 
-### Example usage
+#### Example usage
 
 - TODO
 
-## `useUser`
+### `useUser`
 
 `useUser` is a React hook to get the current user. It either returns the current user or `null` if no user is not logged in.
 
@@ -108,27 +131,27 @@ export function magicLinkLogin({
 useUser(): User | null
 ```
 
-### Example usage
+#### Example usage
 
 - TODO
 
-# Utilities
+## State Utilities
 
-## `getCloudState`
+### `getCloudState`
 
-### Example usage
-
-- TODO
-
-## `setCloudState`
-
-### Example usage
+#### Example usage
 
 - TODO
 
-## `dispatchCloudAction`
+### `setCloudState`
 
-### Example usage
+#### Example usage
+
+- TODO
+
+### `dispatchCloudAction`
+
+#### Example usage
 
 - TODO
 
