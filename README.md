@@ -122,8 +122,13 @@ export function magicLinkLogin({
   email: string;
   appName: string;
   redirectURL?: string;
-}): Promise<User>;
+}): Promise<null>;
 ```
+
+This function returns a promise that resolves when the magic login email is successfully sent. There are two ways to react to when the user successfully logs in (after clicking the magic link in their inbox):
+
+1. `useUser: User | mull` returns a reactive state variable that will switch from `null` to the `User` on _any_ successful login
+2. `magicLinkLogin2 : [Promise<null>, Promise<User>]` returns two promises, the first resolves when the email is successfully sent, and the second resolves when the user successfully logs in from _this_ magic link
 
 #### Example usage
 

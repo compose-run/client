@@ -22,10 +22,19 @@ const ensureSet = (name: string) =>
   (subscriptions[name] = subscriptions[name] || new Set());
 
 const callbacks: {
-  [key: string]: [(...args: any[]) => void, (error: string) => void];
+  [key: string]: [
+    // promise 1
+    (...args: any[]) => void,
+    (error: string) => void,
+    // promise 2 (ie sendMagicLink2 -> LoginResponse)
+    (...args: any[]) => void,
+    (error: string) => void
+  ];
 } = {};
 const getCallbacks = (name: string) => {
-  return callbacks[name] || [() => void 0, () => void 0];
+  return (
+    callbacks[name] || [() => void 0, () => void 0, () => void 0, () => void 0]
+  );
 };
 
 let socketOpen = false;
@@ -50,10 +59,11 @@ function safeParseJSON(str: string | null) {
   }
 }
 
-function send(data: Request) {
-  const requestId = (Math.random() + 1).toString(36).substring(7);
-  return new Promise<User>((resolve, reject) => {
-    callbacks[requestId] = [resolve, reject];
+const uuid = () => (Math.random() + 1).toString(36).substring(7);
+
+function send(data: Request, requestId: string = uuid()) {
+  return new Promise<unknown>((resolve, reject) => {
+    callbacks[requestId] = [resolve, reject, () => void 0, () => void 0];
     if (socketOpen) {
       actuallySend({ ...data, requestId });
     } else {
@@ -128,17 +138,23 @@ const handleServerResponse = function (event: MessageEvent) {
       getCallbacks(data.requestId)[0](data.value);
       updateValue(data.name, data.value);
     }
+  } else if (data.type === "SendMagicLinkResponse") {
+    if (data.error) {
+      getCallbacks(data.requestId)[1](data.error);
+    } else {
+      getCallbacks(data.requestId)[0](null);
+    }
   } else if (data.type === "LoginResponse") {
     if (data.token) {
       localStorage.setItem(COMPOSE_TOKEN_KEY, data.token);
       localStorage.setItem(COMPOSE_USER_CACHE_KEY, JSON.stringify(data.user));
       loggedInUser = data.user || null;
-      getCallbacks(data.requestId)[0](data.user);
+      getCallbacks(data.requestId)[2](data.user);
       loggedInUserSubscriptions.forEach((callback) =>
         callback(data.user as User)
       );
     } else if (data.error) {
-      getCallbacks(data.requestId)[1](data.error);
+      getCallbacks(data.requestId)[3](data.error);
     } else {
       // token already saved in localStorage, so just call the callback
       loggedInUser = data.user || null;
@@ -298,14 +314,41 @@ export function magicLinkLogin({
   email: string;
   appName: string;
   redirectURL?: string;
-}): Promise<User> {
+}): Promise<null> {
   redirectURL = redirectURL || window.location.href;
   return send({
     type: "SendMagicLinkRequest",
     email,
     appName,
     redirectURL,
+  }) as Promise<null>;
+}
+
+export function magicLinkLogin2({
+  email,
+  appName,
+  redirectURL,
+}: {
+  email: string;
+  appName: string;
+  redirectURL?: string;
+}): [Promise<null>, Promise<User>] {
+  redirectURL = redirectURL || window.location.href;
+
+  const requestId = uuid();
+  const sendMagicLinkPromise = send(
+    {
+      type: "SendMagicLinkRequest",
+      email,
+      appName,
+      redirectURL,
+    },
+    requestId
+  );
+  const loginPromise = new Promise<User>((resolve, reject) => {
+    getCallbacks(requestId).push(resolve, reject);
   });
+  return [sendMagicLinkPromise as Promise<null>, loginPromise];
 }
 
 export function useUser(): User | null {
