@@ -201,7 +201,7 @@ const handleSocketClose = function () {
 };
 
 function setupWebsocket() {
-  if (socket) socket.close();
+  if (socket && socketOpen) socket.close();
 
   try {
     socket = new WebSocket(composeServerUrl);
