@@ -25,13 +25,17 @@ Compose is a modern Firebase-alternative for React apps, featuring:
     - [`useCloudState`](#usecloudstate)
     - [`useCloudReducer`](#usecloudreducer)
   - [State Utilities](#state-utilities)
-    - [getCloudState](#getcloudstate)
+    - [`getCloudState`](#getcloudstate)
     - [`setCloudState`](#setcloudstate)
     - [`dispatchCloudAction`](#dispatchcloudaction)
   - [Users & Authentication](#users--authentication)
     - [`magicLinkLogin`](#magiclinklogin)
     - [`useUser`](#useuser)
 - [FAQ](#faq)
+  - [What kind of state can I store?](#what-kind-of-state-can-i-store)
+  - [How much data can I store?](#how-much-data-can-i-store)
+  - [How do I debug the current value of the state?](#how-do-i-debug-the-current-value-of-the-state)
+  - [Does it work offline?](#does-it-work-offline)
 
 # Example App
 
@@ -161,13 +165,13 @@ useUser(): User | null
 
 You can store any JSON object.
 
-#### How much data can I store?
+## How much data can I store?
 
 Each `name` shouldn't hold more than **~25,000 objects or ~4MB** because all state needs to [fit into your users' browsers](https://joshzeigler.com/technology/web-development/how-big-is-too-big-for-json).
 
 This limitation will be lifted when we launch **`useCloudQuery`** (_coming soon_).
 
-#### How do I see & debug the current value of the state?
+## How do I debug the current value of the state?
 
 You can get the current value of the state as a `Promise` and log it:
 
