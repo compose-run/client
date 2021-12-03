@@ -318,3 +318,5 @@ export function logout() {
   localStorage.removeItem(COMPOSE_USER_CACHE_KEY);
   socket.send(JSON.stringify({ type: "LogoutRequest" }));
 }
+
+export { Request, Request_, Response, User } from "./shared-types";

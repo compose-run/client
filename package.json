@@ -1,6 +1,6 @@
 {
   "name": "@compose-run/compose",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "a whole backend without leaving your react app",
   "source": "index.ts",
   "main": "dist/main.js",
@@ -9,7 +9,7 @@
   "license": "MIT",
   "scripts": {
     "watch": "parcel index.html",
-    "build": "parcel build && rsync -r dist/* ../composejs-community/src/compose-client-dist"
+    "build": "parcel build"
   },
   "devDependencies": {
     "@parcel/packager-ts": "^2.0.1",
