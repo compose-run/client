@@ -1,10 +1,10 @@
 {
   "name": "@compose-run/client",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "a whole backend without leaving your react app",
   "source": "index.ts",
   "browser": "dist/index.js",
-  "types": "dist/types.d.ts",
+  "types": "dist/index.d.ts",
   "license": "MIT",
   "scripts": {
     "watch": "parcel index.html",
