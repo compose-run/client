@@ -268,7 +268,7 @@ export function useCloudReducer<State, Action, Response>({
   reducer: (
     state: State,
     action: Action,
-    reducer: (response: Response) => void
+    context: { resolve: (response: Response) => void; user: User }
   ) => State;
 }) {
   const [state, setState] = useState(initialState as unknown);

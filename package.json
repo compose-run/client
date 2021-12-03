@@ -1,14 +1,15 @@
 {
   "name": "@compose-run/client",
-  "version": "0.0.9",
+  "version": "0.0.10",
   "description": "a whole backend without leaving your react app",
   "license": "MIT",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "files": [
-    "dist",
-    "dist.browser"
+    "dist"
   ],
   "scripts": {
-    "build": "tsc && tsc -p tsconfig.browser.json"
+    "build": "tsc"
   },
   "devDependencies": {
     "@types/react": "^17.0.36",
