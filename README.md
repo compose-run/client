@@ -16,9 +16,9 @@ Compose is a modern Firebase-alternative for React apps, featuring:
 # Table of Contents
 
 - [Example App](#example-app)
-- [Installation](#getting-started)
+- [Installation](#installation)
   - [Codesandbox Template](#codesandbox-template)
-  - [NPM](#npm)
+  - [NPM or Yarn](#install-via-npm-or-yarn)
 - [Tutorial](#tutorial)
 - [API](#api)
   - [State Hooks](#state)
@@ -36,6 +36,8 @@ Compose is a modern Firebase-alternative for React apps, featuring:
   - [How much data can I store?](#how-much-data-can-i-store)
   - [How do I debug the current value of the state?](#how-do-i-debug-the-current-value-of-the-state)
   - [Does it work offline?](#does-it-work-offline)
+- [Pricing](#pricing)
+- [Contributing](#contributing)
 
 # Example App
 
@@ -45,7 +47,7 @@ The Compose Community chat app is built on Compose. [Check out the code](https:/
 
 ## Codesandbox Template
 
-## Install via npm or yarn
+## NPM or Yarn
 
 ```
 npm install --save @compose-run/client
@@ -61,7 +63,7 @@ yarn add @compose-run/client
 
 # API
 
-## State
+## State Hooks
 
 ### `useCloudState`
 
@@ -196,19 +198,16 @@ useEffect(() => console.log(testState), [testState]);
 
 Compose doesn't allow any offline editing. We may add a CRDT mode in the future which would enable offline edits.
 
-## Pricing
+# Pricing
 
-- 10mb - free
-- 1gb - $9 / month
-- 100gb - $10 / month
-- 1tb - $24 / month
+Compose is currently free while we work on a pricing model.
 
 # Contributing
 
 ## How to use
 
 - Install dependencies `npm install`
-- Build and rsync to `../compose-community` (expected as a sibling repo): `npm run build`
+- Build `npm run build`
 
 ## File Structure
 
@@ -216,7 +215,3 @@ There are just two files, really:
 
 - `index.ts`, which contains the whole library
 - `shared-types.ts`, which contains all the types that are shared between the client and server
-
-## Running & Testing
-
-Currently the way I run & test this library is in the context of the `compose-community` project. The `npm run build` command will compile and sync the built version of the library to `compose-community`. (Unfortunately I haven't yet found a way to export the types to that repo, so you may have to recreate them there manually. Hopefully this will be solved when we package up this client library as a proper npm module.)

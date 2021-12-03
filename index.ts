@@ -32,6 +32,7 @@ let socketOpen = false;
 let queuedMessages: Request_[] = [];
 
 let socket: WebSocket;
+let composeServerUrl = "ws://api.compose.run";
 
 //////////////////////////////////////////
 // UTILS
@@ -187,7 +188,7 @@ function setupWebsocket() {
   if (socket) socket.close();
 
   try {
-    socket = new WebSocket("ws://localhost:3000"); // TODO - point this to prod on releases
+    socket = new WebSocket(composeServerUrl);
     socket.addEventListener("message", handleServerResponse);
     socket.addEventListener("open", handleSocketOpen);
     socket.addEventListener("close", handleSocketClose);
@@ -196,6 +197,11 @@ function setupWebsocket() {
   }
 }
 setupWebsocket();
+
+export function setComposeServerUrl(url: string) {
+  composeServerUrl = url;
+  setupWebsocket();
+}
 
 //////////////////////////////////////////
 // Common: Cloud State & Reducer
