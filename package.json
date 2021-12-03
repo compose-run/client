@@ -1,13 +1,12 @@
 {
   "name": "@compose-run/compose",
-  "version": "0.0.1",
-  "description": "",
+  "version": "0.0.2",
+  "description": "a whole backend without leaving your react app",
   "source": "index.ts",
   "main": "dist/main.js",
   "module": "dist/module.js",
   "types": "dist/types.d.ts",
-  "author": "Steve Krouse",
-  "license": "ISC",
+  "license": "MIT",
   "scripts": {
     "watch": "parcel index.html",
     "build": "parcel build && rsync -r dist/* ../composejs-community/src/compose-client-dist"
