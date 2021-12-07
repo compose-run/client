@@ -41,7 +41,8 @@ let socketOpen = false;
 let queuedMessages: Request_[] = [];
 
 let socket: WebSocket;
-let composeServerUrl = "wss://api.compose.run";
+let composeServerUrl =
+  process.env.REACT_APP_COMPOSE_SERVER_URL || "wss://api.compose.run";
 
 //////////////////////////////////////////
 // UTILS
@@ -213,11 +214,6 @@ function setupWebsocket() {
   }
 }
 setupWebsocket();
-
-export function setComposeServerUrl(url: string) {
-  composeServerUrl = url;
-  setupWebsocket();
-}
 
 //////////////////////////////////////////
 // Common: Cloud State & Reducer
