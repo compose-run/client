@@ -13,6 +13,7 @@
     "watch": "tsc --watch"
   },
   "devDependencies": {
+    "@types/node": "^16.11.12",
     "@types/react": "^17.0.36",
     "typescript": "^4.5.2"
   },
@@ -24,5 +25,8 @@
     "not dead",
     "not ie <= 11",
     "not op_mini all"
-  ]
+  ],
+  "dependencies": {
+    "@compose-run/client": "^0.0.15"
+  }
 }
