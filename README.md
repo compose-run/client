@@ -226,8 +226,10 @@ There are just two files, really:
 You can use `npm link` if you want to test out changes to this client library in another project locally. For example, let's say we wanted to test out a change to this client library in the `@compose-run/community`repo:
 
 1. In this repo, run `npm link`
-2. In this repo, run `npm link ../@compose-run/community/node_modules/react` [^1]
+2. In this repo, run `npm link ../community/node_modules/react` [^1]
 3. In `@compose-run/community`, run `npm link @compose-run/client`
-4. In this repo, run `npm run watch`
+4. In this repo, run `npm run build`
 
-[1]: This step is to stop React from complain that you're "breaking the rules of hooks" by having "more than one copy of React in the same app". As described in the [React docs](https://reactjs.org/warnings/invalid-hook-call-warning.html#duplicate-react), you can fix this by running
+`npm link` can be tricky to get working, particularly because you have to link two repos in this case! `npm ls` and `npm ls -g` can be handy for debugging. Additionally, deleting your `node_modules` directory and `npm install`ing from scratch can be helpful.
+
+[1]: This step is to stop React from complain that you're "breaking the rules of hooks" by having "more than one copy of React in the same app", as described in the [React docs](https://reactjs.org/warnings/invalid-hook-call-warning.html#duplicate-react).
