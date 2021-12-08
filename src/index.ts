@@ -9,7 +9,7 @@ const COMPOSE_USER_CACHE_KEY = "compose-cache:user";
 const COMPOSE_TOKEN_KEY = "compose-token";
 
 const subscriptions: {
-  [key: string]: Set<(data: React.SetStateAction<unknown>) => void>;
+  [key: string]: Set<(data: React.SetStateAction<any>) => void>;
 } = {};
 
 let loggedInUser: User | null = null;
@@ -219,7 +219,7 @@ setupWebsocket();
 // Common: Cloud State & Reducer
 //////////////////////////////////////////
 
-function useSubscription(name: string, setState: (data: unknown) => void) {
+function useSubscription<State>(name: string, setState: (data: State) => void) {
   useEffect(() => {
     if (!ensureSet(name).size) {
       send({
@@ -252,10 +252,16 @@ export function setCloudState<A>(name: string, value: unknown) {
   });
 }
 
-export function useCloudState(name: string, initialState: unknown) {
+export function useCloudState<State>({
+  name,
+  initialState,
+}: {
+  name: string;
+  initialState: State;
+}): [State, (data: State) => void] {
   const [state, setState] = useState(initialState);
   useSubscription(name, setState);
-  return [state, (s: unknown) => setCloudState(name, s)];
+  return [state, (s: State) => setCloudState(name, s)];
 }
 
 //////////////////////////////////////////
