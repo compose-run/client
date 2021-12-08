@@ -16,7 +16,7 @@ let loggedInUser: User | null = null;
 if (localStorage.getItem(COMPOSE_USER_CACHE_KEY)) {
   loggedInUser = safeParseJSON(localStorage.getItem(COMPOSE_USER_CACHE_KEY));
 }
-const loggedInUserSubscriptions = new Set<(user: User) => void>();
+const loggedInUserSubscriptions = new Set<(user: User | null) => void>();
 
 const ensureSet = (name: string) =>
   (subscriptions[name] = subscriptions[name] || new Set());
@@ -151,15 +151,13 @@ const handleServerResponse = function (event: MessageEvent) {
       localStorage.setItem(COMPOSE_USER_CACHE_KEY, JSON.stringify(data.user));
       loggedInUser = data.user || null;
       getCallbacks(data.requestId)[2](data.user);
-      loggedInUserSubscriptions.forEach((callback) =>
-        callback(data.user as User)
-      );
+      loggedInUserSubscriptions.forEach((callback) => callback(loggedInUser));
     } else if (data.error) {
       getCallbacks(data.requestId)[3](data.error);
     } else {
-      // token already saved in localStorage, so just call the callback
-      loggedInUser = data.user || null;
-      getCallbacks(data.requestId)[0](data.user);
+      // token already saved in localStorage
+      getCallbacks(data.requestId)[0](loggedInUser);
+      loggedInUserSubscriptions.forEach((callback) => callback(loggedInUser));
     }
   } else if (data.type === "ParseErrorResponse") {
     console.error("Sent invalid JSON to server");
@@ -172,6 +170,12 @@ const handleServerResponse = function (event: MessageEvent) {
     if (data.error) {
       console.error(`${data.name}\n\n${data.error.stack}`);
     }
+  } else if (data.type === "RegisterReducerResponse") {
+    // if you're the application programmer, you want to know when `data.error` is present
+    // because that likely means you're not logged in when you want to be
+    // however, this erroring is the default state for users of states (because they can't write the reducer)
+    // so we don't want to spam the console with this error for all clients
+    // so currently we're just going to ignore this error...
   } else {
     console.warn(`Unknown response type from Compose server: ${data.type}`);
   }
@@ -293,16 +297,31 @@ export function useCloudReducer<State, Action, Response>({
   useSubscription(name, setState);
 
   useEffect(() => {
-    send({
-      type: "RegisterReducerRequest",
-      name,
-      reducerCode: reducer.toString(),
-      initialState,
-    });
+    // try to register the reducer now, and on all authentication changes
+    registerReducer({ name, reducer, initialState });
+    loggedInUserSubscriptions.add(() =>
+      registerReducer({ name, reducer, initialState })
+    );
   }, [name, reducer.toString(), JSON.stringify(initialState)]);
 
   return [state, (s: State) => dispatchCloudReducerEvent(name, s)];
 }
+
+const registerReducer = <State>({
+  name,
+  reducer,
+  initialState,
+}: {
+  name: string;
+  reducer: Function;
+  initialState: State;
+}) =>
+  send({
+    type: "RegisterReducerRequest",
+    name,
+    reducerCode: reducer.toString(),
+    initialState,
+  });
 
 //////////////////////////////////////////
 // USER & AUTH
