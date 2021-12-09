@@ -159,11 +159,16 @@ const handleServerResponse = function (event: MessageEvent) {
       loggedInUserSubscriptions.forEach((callback) => callback(loggedInUser));
     } else if (data.error) {
       getCallbacks(data.requestId)[3](data.error);
+      clearUserCache();
+      loggedInUserSubscriptions.forEach((callback) => callback(null));
     } else {
       // token already saved in localStorage
       getCallbacks(data.requestId)[0](loggedInUser);
       loggedInUserSubscriptions.forEach((callback) => callback(loggedInUser));
     }
+  } else if (data.type === "LogoutResponse") {
+    clearUserCache();
+    loggedInUserSubscriptions.forEach((callback) => callback(null));
   } else if (data.type === "ParseErrorResponse") {
     console.error("Sent invalid JSON to server");
     console.error(data.cause);
@@ -399,9 +404,14 @@ export function useUser(): User | null {
   return user;
 }
 
-export function logout() {
+function clearUserCache() {
+  loggedInUser = null;
   localStorage.removeItem(COMPOSE_TOKEN_KEY);
   localStorage.removeItem(COMPOSE_USER_CACHE_KEY);
+}
+
+export function logout() {
+  clearUserCache();
   socket.send(JSON.stringify({ type: "LogoutRequest" }));
 }
 
