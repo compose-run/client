@@ -62,8 +62,8 @@ function safeParseJSON(str: string | null) {
 
 const uuid = () => (Math.random() + 1).toString(36).substring(7);
 
-function send(data: Request, requestId: string = uuid()) {
-  return new Promise<unknown>((resolve, reject) => {
+function send<Response>(data: Request, requestId: string = uuid()) {
+  return new Promise<Response>((resolve, reject) => {
     callbacks[requestId] = [resolve, reject, () => void 0, () => void 0];
     if (socketOpen) {
       actuallySend({ ...data, requestId });
@@ -272,8 +272,11 @@ export function useCloudState<State>({
 // CLOUD REDUCER
 //////////////////////////////////////////
 
-export function dispatchCloudReducerEvent<A>(name: string, event: A) {
-  send({
+export function dispatchCloudReducerEvent<Event, Response>(
+  name: string,
+  event: Event
+): Promise<Response> {
+  return send({
     type: "ReducerEventRequest",
     name,
     value: event,
@@ -292,8 +295,8 @@ export function useCloudReducer<State, Action, Response>({
     action: Action,
     context: { resolve: (response: Response) => void; userId: number }
   ) => State;
-}) {
-  const [state, setState] = useState(initialState as unknown);
+}): [State | null, (action: Action) => Promise<Response>] {
+  const [state, setState] = useState(null);
   useSubscription(name, setState);
 
   useEffect(() => {
@@ -304,7 +307,7 @@ export function useCloudReducer<State, Action, Response>({
     );
   }, [name, reducer.toString(), JSON.stringify(initialState)]);
 
-  return [state, (s: State) => dispatchCloudReducerEvent(name, s)];
+  return [state, (a: Action) => dispatchCloudReducerEvent(name, a)];
 }
 
 const registerReducer = <State>({
