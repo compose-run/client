@@ -44,6 +44,10 @@ let socket: WebSocket;
 let composeServerUrl =
   process.env.REACT_APP_COMPOSE_SERVER_URL || "wss://api.compose.run";
 
+const registeredReducers: {
+  [name: string]: { initialState: any; reducer: string };
+} = {};
+
 //////////////////////////////////////////
 // UTILS
 //////////////////////////////////////////
@@ -318,13 +322,21 @@ const registerReducer = <State>({
   name: string;
   reducer: Function;
   initialState: State;
-}) =>
-  send({
-    type: "RegisterReducerRequest",
-    name,
-    reducerCode: reducer.toString(),
-    initialState,
-  });
+}) => {
+  if (
+    !registeredReducers[name] ||
+    JSON.stringify(registeredReducers[name]) !==
+      JSON.stringify({ initialState, reducer: reducer.toString() })
+  ) {
+    registeredReducers[name] = { initialState, reducer: reducer.toString() };
+    send({
+      type: "RegisterReducerRequest",
+      name,
+      reducerCode: reducer.toString(),
+      initialState,
+    });
+  }
+};
 
 //////////////////////////////////////////
 // USER & AUTH
