@@ -113,6 +113,7 @@ const magicLinkToken = new URLSearchParams(window.location.search).get(
   "composeToken"
 );
 if (magicLinkToken) {
+  window.history.replaceState(null, document.title, window.location.pathname);
   send({
     type: "LoginRequest",
     token: magicLinkToken,
