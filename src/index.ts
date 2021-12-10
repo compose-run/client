@@ -44,7 +44,7 @@ let socket: WebSocket;
 let composeServerUrl =
   process.env.REACT_APP_COMPOSE_SERVER_URL || "wss://api.compose.run";
 
-const registeredReducers: {
+let registeredReducers: {
   [name: string]: { initialState: any; reducer: string };
 } = {};
 
@@ -96,12 +96,15 @@ function updateValue(name: string, value: unknown) {
   // TODO - cache value in localstorage
 }
 
-// https://blog.trannhat.xyz/generate-a-hash-from-string-in-javascript/
-const hashCode = function (s: string) {
-  return s.split("").reduce(function (a, b) {
-    a = (a << 5) - a + b.charCodeAt(0);
-    return a & a;
-  }, 0);
+const getCachedState = (name: string) =>
+  JSON.parse(localStorage.getItem("compose-cache:" + name) || "null");
+
+const setCachedState = (name: string, value: any) =>
+  localStorage.setItem("compose-cache:" + name, JSON.stringify(value));
+
+const callAuthStateChangedCallbacks = (user: User | null) => {
+  registeredReducers = {};
+  loggedInUserSubscriptions.forEach((callback) => callback(user));
 };
 
 //////////////////////////////////////////
@@ -141,6 +144,7 @@ const handleServerResponse = function (event: MessageEvent) {
         `${data.name}: Cannot set this state because there is a reducer with the same name`
       );
     } else {
+      setCachedState(data.name, data.value);
       getCallbacks(data.requestId)[0](data.value);
       updateValue(data.name, data.value);
     }
@@ -156,19 +160,19 @@ const handleServerResponse = function (event: MessageEvent) {
       localStorage.setItem(COMPOSE_USER_CACHE_KEY, JSON.stringify(data.user));
       loggedInUser = data.user || null;
       getCallbacks(data.requestId)[2](data.user);
-      loggedInUserSubscriptions.forEach((callback) => callback(loggedInUser));
+      callAuthStateChangedCallbacks(loggedInUser);
     } else if (data.error) {
       getCallbacks(data.requestId)[3](data.error);
       clearUserCache();
-      loggedInUserSubscriptions.forEach((callback) => callback(null));
+      callAuthStateChangedCallbacks(null);
     } else {
       // token already saved in localStorage
       getCallbacks(data.requestId)[0](loggedInUser);
-      loggedInUserSubscriptions.forEach((callback) => callback(loggedInUser));
+      callAuthStateChangedCallbacks(loggedInUser);
     }
   } else if (data.type === "LogoutResponse") {
     clearUserCache();
-    loggedInUserSubscriptions.forEach((callback) => callback(null));
+    callAuthStateChangedCallbacks(null);
   } else if (data.type === "ParseErrorResponse") {
     console.error("Sent invalid JSON to server");
     console.error(data.cause);
@@ -273,7 +277,7 @@ export function useCloudState<State>({
   name: string;
   initialState: State;
 }): [State, (data: State) => void] {
-  const [state, setState] = useState(initialState);
+  const [state, setState] = useState(getCachedState(name) || initialState);
   useSubscription(name, setState);
   return [state, (s: State) => setCloudState(name, s)];
 }
@@ -306,7 +310,7 @@ export function useCloudReducer<State, Action, Response>({
     context: { resolve: (response: Response) => void; userId: number }
   ) => State;
 }): [State | null, (action: Action) => Promise<Response>] {
-  const [state, setState] = useState(null);
+  const [state, setState] = useState(getCachedState(name));
   useSubscription(name, setState);
 
   useEffect(() => {
