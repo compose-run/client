@@ -96,11 +96,19 @@ function updateValue(name: string, value: unknown) {
   // TODO - cache value in localstorage
 }
 
-const getCachedState = (name: string) =>
-  JSON.parse(localStorage.getItem("compose-cache:" + name) || "null");
+const getCachedState = (name: string) => {
+  try {
+    return JSON.parse(localStorage.getItem("compose-cache:" + name) || "null");
+  } catch (e) {
+    return null;
+  }
+};
 
 const setCachedState = (name: string, value: any) =>
-  localStorage.setItem("compose-cache:" + name, JSON.stringify(value));
+  localStorage.setItem(
+    "compose-cache:" + name,
+    JSON.stringify(value) || "null"
+  );
 
 const callAuthStateChangedCallbacks = (user: User | null) => {
   registeredReducers = {};
