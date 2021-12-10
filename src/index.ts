@@ -315,7 +315,11 @@ export function useCloudReducer<State, Action, Response>({
   reducer: (
     state: State,
     action: Action,
-    context: { resolve: (response: Response) => void; userId: number }
+    context: {
+      resolve: (response: Response) => void;
+      userId: number;
+      timestamp: number;
+    }
   ) => State;
 }): [State | null, (action: Action) => Promise<Response>] {
   const [state, setState] = useState(getCachedState(name));
