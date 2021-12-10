@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Request, Request_, Response, User } from "./shared-types";
 
 //////////////////////////////////////////
@@ -287,7 +287,8 @@ export function useCloudState<State>({
 }): [State, (data: State) => void] {
   const [state, setState] = useState(getCachedState(name) || initialState);
   useSubscription(name, setState);
-  return [state, (s: State) => setCloudState(name, s)];
+  const setter = useCallback((s: State) => setCloudState(name, s), [name]);
+  return [state, setter];
 }
 
 //////////////////////////////////////////
@@ -333,7 +334,12 @@ export function useCloudReducer<State, Action, Response>({
     );
   }, [name, reducer.toString(), JSON.stringify(initialState)]);
 
-  return [state, (a?: Action) => dispatchCloudReducerEvent(name, a)];
+  const dispatcher = useCallback(
+    (a?: Action) => dispatchCloudReducerEvent(name, a),
+    [name]
+  ) as (a?: Action) => Promise<Response>;
+
+  return [state, dispatcher];
 }
 
 const registerReducer = <State>({
