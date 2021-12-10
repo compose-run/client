@@ -321,7 +321,7 @@ export function useCloudReducer<State, Action, Response>({
       timestamp: number;
     }
   ) => State;
-}): [State | null, (action: Action) => Promise<Response>] {
+}): [State | null, (action?: Action) => Promise<Response>] {
   const [state, setState] = useState(getCachedState(name));
   useSubscription(name, setState);
 
@@ -333,7 +333,7 @@ export function useCloudReducer<State, Action, Response>({
     );
   }, [name, reducer.toString(), JSON.stringify(initialState)]);
 
-  return [state, (a: Action) => dispatchCloudReducerEvent(name, a)];
+  return [state, (a?: Action) => dispatchCloudReducerEvent(name, a)];
 }
 
 const registerReducer = <State>({
