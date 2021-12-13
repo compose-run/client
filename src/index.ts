@@ -185,12 +185,18 @@ const handleServerResponse = function (event: MessageEvent) {
     console.error("Sent invalid JSON to server");
     console.error(data.cause);
   } else if (data.type === "ResolveDispatchResponse") {
-    getCallbacks(data.requestId)[0](data.resolveValue);
-    updateValue(data.name, data.returnValue);
+    if (data.returnValue) {
+      setCachedState(data.name, data.returnValue);
+      getCallbacks(data.requestId)[0](data.resolveValue);
+      updateValue(data.name, data.returnValue);
+    }
   } else if (data.type === "RuntimeDebugResponse") {
     data.consoles.forEach((log) => console.log(`${data.name}: ${log}`));
     if (data.error) {
-      console.error(`${data.name}\n\n${data.error.stack}`);
+      console.error(
+        `${data.name}: %c${data.error.stack?.split("\n")[0]}`,
+        "font-weight: bold"
+      );
     }
   } else if (data.type === "RegisterReducerResponse") {
     // if you're the application programmer, you want to know when `data.error` is present
