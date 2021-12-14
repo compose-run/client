@@ -45,12 +45,18 @@ let composeServerUrl =
   process.env.REACT_APP_COMPOSE_SERVER_URL || "wss://api.compose.run";
 
 let registeredReducers: {
-  [name: string]: { initialState: any; reducer: string };
+  [name: string]: { initialState: any; reducerCode: string };
 } = {};
+
+const liveSubscriptions = new Set<string>();
 
 //////////////////////////////////////////
 // UTILS
 //////////////////////////////////////////
+
+function isPromise<A>(p: Promise<A> | A): boolean {
+  return p && Object.prototype.toString.call(p) === "[object Promise]";
+}
 
 function safeParseJSON(str: string | null) {
   if (!str) {
@@ -93,7 +99,7 @@ function actuallySend(data: Request_) {
 
 function updateValue(name: string, value: unknown) {
   ensureSet(name).forEach((callback) => callback(value));
-  // TODO - cache value in localstorage
+  setCachedState(name, value);
 }
 
 const getCachedState = (name: string) => {
@@ -152,7 +158,9 @@ const handleServerResponse = function (event: MessageEvent) {
         `${data.name}: Cannot set this state because there is a reducer with the same name`
       );
     } else {
-      setCachedState(data.name, data.value);
+      if (data.type === "SubscribeResponse") {
+        liveSubscriptions.add(data.name);
+      }
       getCallbacks(data.requestId)[0](data.value);
       updateValue(data.name, data.value);
     }
@@ -186,7 +194,6 @@ const handleServerResponse = function (event: MessageEvent) {
     console.error(data.cause);
   } else if (data.type === "ResolveDispatchResponse") {
     if (data.returnValue) {
-      setCachedState(data.name, data.returnValue);
       getCallbacks(data.requestId)[0](data.resolveValue);
       updateValue(data.name, data.returnValue);
     }
@@ -204,6 +211,8 @@ const handleServerResponse = function (event: MessageEvent) {
     // however, this erroring is the default state for users of states (because they can't write the reducer)
     // so we don't want to spam the console with this error for all clients
     // so currently we're just going to ignore this error...
+  } else if (data.type === "UnsubscribeResponse") {
+    liveSubscriptions.delete(data.name);
   } else {
     console.warn(`Unknown response type from Compose server: ${data.type}`);
   }
@@ -272,6 +281,37 @@ function useSubscription<State>(name: string, setState: (data: State) => void) {
   }, [setState]);
 }
 
+// utilizes the subscription & cache infrastructure to get a single state value as a Promise
+export function getCloudState<State>(name: string): Promise<State | null> {
+  return new Promise((resolve) => {
+    // use the cache if the subscription is live
+    if (liveSubscriptions.has(name)) {
+      resolve(getCachedState(name));
+    } else {
+      // otherwise, create the subscription if it doesn't exist
+      if (!ensureSet(name).size) {
+        send({
+          type: "SubscribeRequest",
+          name,
+        });
+        // and resolve on the value when it arrives
+        // and unsubsubscribe if we're the only subscriber
+        const onValue = (value: State) => {
+          resolve(value);
+          subscriptions[name].delete(onValue);
+          if (!ensureSet(name).size) {
+            send({
+              type: "UnsubscribeRequest",
+              name,
+            });
+          }
+        };
+        subscriptions[name].add(onValue);
+      }
+    }
+  });
+}
+
 //////////////////////////////////////////
 // Cloud State
 //////////////////////////////////////////
@@ -318,7 +358,7 @@ export function useCloudReducer<State, Action, Response>({
   reducer,
 }: {
   name: string;
-  initialState: State;
+  initialState: State | Promise<State>; //(() => Promise<State>);
   reducer: (
     state: State,
     action: Action,
@@ -331,15 +371,28 @@ export function useCloudReducer<State, Action, Response>({
 }): [State | null, (action?: Action) => Promise<Response>] {
   const [state, setState] = useState(getCachedState(name));
   useSubscription(name, setState);
+  (initialState as Promise<State>).then(() => console.log("resolved outside"));
 
   useEffect(() => {
-    // try to register the reducer now, and on all authentication changes
-    registerReducer({ name, reducer, initialState });
-    loggedInUserSubscriptions.add(() =>
-      registerReducer({ name, reducer, initialState })
-    );
+    // if the initialState is a Promise, only register the reducer once the promise resolves
+    if (isPromise(initialState)) {
+      (initialState as Promise<State>).then((s) => {
+        console.log("resolved!");
+        registerReducer({ name, reducer, initialState: s });
+        loggedInUserSubscriptions.add(() =>
+          registerReducer({ name, reducer, initialState: s })
+        );
+      });
+    } else {
+      registerReducer({ name, reducer, initialState });
+      loggedInUserSubscriptions.add(() =>
+        registerReducer({ name, reducer, initialState })
+      );
+    }
   }, [name, reducer.toString(), JSON.stringify(initialState)]);
 
+  // TODO - ensure that we buffer all of these until the initial state promise is set
+  // otherwise we will miss any dispatches that are triggered before the new reducer is registered
   const dispatcher = useCallback(
     (a?: Action) => dispatchCloudReducerEvent(name, a),
     [name]
@@ -357,17 +410,19 @@ const registerReducer = <State>({
   reducer: Function;
   initialState: State;
 }) => {
+  const cacheValue = {
+    initialState,
+    reducerCode: reducer.toString(),
+  };
   if (
     !registeredReducers[name] ||
-    JSON.stringify(registeredReducers[name]) !==
-      JSON.stringify({ initialState, reducer: reducer.toString() })
+    JSON.stringify(registeredReducers[name]) !== JSON.stringify(cacheValue)
   ) {
-    registeredReducers[name] = { initialState, reducer: reducer.toString() };
+    registeredReducers[name] = cacheValue;
     send({
       type: "RegisterReducerRequest",
       name,
-      reducerCode: reducer.toString(),
-      initialState,
+      ...cacheValue,
     });
   }
 };

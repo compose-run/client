@@ -1,6 +1,6 @@
 {
   "name": "@compose-run/client",
-  "version": "0.0.26",
+  "version": "0.0.27",
   "description": "a whole backend without leaving your react app",
   "license": "MIT",
   "main": "dist/index.js",
