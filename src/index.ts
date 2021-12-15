@@ -371,7 +371,6 @@ export function useCloudReducer<State, Action, Response>({
 }): [State | null, (action?: Action) => Promise<Response>] {
   const [state, setState] = useState(getCachedState(name));
   useSubscription(name, setState);
-  (initialState as Promise<State>).then(() => console.log("resolved outside"));
 
   useEffect(() => {
     // if the initialState is a Promise, only register the reducer once the promise resolves
