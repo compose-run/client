@@ -211,6 +211,10 @@ const handleServerResponse = function (event: MessageEvent) {
     // however, this erroring is the default state for users of states (because they can't write the reducer)
     // so we don't want to spam the console with this error for all clients
     // so currently we're just going to ignore this error...
+
+    if (data.value) {
+      updateValue(data.name, data.value);
+    }
   } else if (data.type === "UnsubscribeResponse") {
     liveSubscriptions.delete(data.name);
   } else {
@@ -372,10 +376,9 @@ export function useCloudReducer<State, Action, Response>({
   const [state, setState] = useState(getCachedState(name));
   useSubscription(name, setState);
 
-  const userId = useUser();
-
-  useEffect(() => {
-    // if the initialState is a Promise, only register the reducer once the promise resolves
+  // useEffect was causing such bugs, let's just do this on every render
+  // because registerReducer is memoized
+  if (!state) {
     if (isPromise(initialState)) {
       (initialState as Promise<State>).then((s) => {
         registerReducer({ name, reducer, initialState: s });
@@ -383,12 +386,7 @@ export function useCloudReducer<State, Action, Response>({
     } else {
       registerReducer({ name, reducer, initialState });
     }
-  }, [
-    name,
-    reducer.toString(),
-    isPromise(initialState) ? initialState : JSON.stringify(initialState),
-    userId,
-  ]);
+  }
 
   // TODO - ensure that we buffer all of these until the initial state promise is set
   // otherwise we will miss any dispatches that are triggered before the new reducer is registered

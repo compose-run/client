@@ -118,6 +118,7 @@ interface RegisterReducerResponse {
   type: "RegisterReducerResponse";
   requestId: string;
   name: string;
+  value?: unknown;
   error?: "Unauthorized" | string;
   warn?: "New initial state ignored" | string;
 }
