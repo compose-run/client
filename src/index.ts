@@ -372,23 +372,23 @@ export function useCloudReducer<State, Action, Response>({
   const [state, setState] = useState(getCachedState(name));
   useSubscription(name, setState);
 
+  const userId = useUser();
+
   useEffect(() => {
     // if the initialState is a Promise, only register the reducer once the promise resolves
     if (isPromise(initialState)) {
       (initialState as Promise<State>).then((s) => {
-        console.log("resolved!");
         registerReducer({ name, reducer, initialState: s });
-        loggedInUserSubscriptions.add(() =>
-          registerReducer({ name, reducer, initialState: s })
-        );
       });
     } else {
       registerReducer({ name, reducer, initialState });
-      loggedInUserSubscriptions.add(() =>
-        registerReducer({ name, reducer, initialState })
-      );
     }
-  }, [name, reducer.toString(), JSON.stringify(initialState)]);
+  }, [
+    name,
+    reducer.toString(),
+    isPromise(initialState) ? initialState : JSON.stringify(initialState),
+    userId,
+  ]);
 
   // TODO - ensure that we buffer all of these until the initial state promise is set
   // otherwise we will miss any dispatches that are triggered before the new reducer is registered
