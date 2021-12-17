@@ -102,7 +102,7 @@ function updateValue(name: string, value: unknown) {
   setCachedState(name, value);
 }
 
-const getCachedState = (name: string) => {
+const getCachedState = <State>(name: string): State | null => {
   try {
     return JSON.parse(localStorage.getItem("compose-cache:" + name) || "null");
   } catch (e) {
@@ -334,9 +334,18 @@ export function useCloudState<State>({
 }: {
   name: string;
   initialState: State;
-}): [State, (data: State) => void] {
-  const [state, setState] = useState(getCachedState(name) || initialState);
-  useSubscription(name, setState);
+}): [State | null, (data: State) => void] {
+  const [state, setState] = useState<State | null>(getCachedState(name));
+  const [firstLoad, setFirstLoad] = useState(true);
+  useSubscription(name, (state: State) => {
+    if (!state && firstLoad) {
+      setCloudState(name, initialState);
+    } else {
+      setState(state);
+    }
+    setFirstLoad(false);
+  });
+
   const setter = useCallback((s: State) => setCloudState(name, s), [name]);
   return [state, setter];
 }
