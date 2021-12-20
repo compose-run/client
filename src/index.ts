@@ -387,14 +387,15 @@ export function useCloudReducer<State, Action, Response>({
 
   // useEffect was causing such bugs, let's just do this on every render
   // because registerReducer is memoized
-  if (!state) {
-    if (isPromise(initialState)) {
-      (initialState as Promise<State>).then((s) => {
-        registerReducer({ name, reducer, initialState: s });
-      });
-    } else {
-      registerReducer({ name, reducer, initialState });
-    }
+  if (!state && isPromise(initialState)) {
+    (initialState as Promise<State>).then((s) => {
+      registerReducer({ name, reducer, initialState: s });
+    });
+  } else if (state && !isPromise(initialState)) {
+    // can just register with a null initial state because it'll be ignored
+    registerReducer({ name, reducer, initialState: null });
+  } else {
+    registerReducer({ name, reducer, initialState });
   }
 
   // TODO - ensure that we buffer all of these until the initial state promise is set
@@ -446,12 +447,11 @@ export function magicLinkLogin({
   appName: string;
   redirectURL?: string;
 }): Promise<null> {
-  redirectURL = redirectURL || window.location.href;
   return send({
     type: "SendMagicLinkRequest",
     email,
     appName,
-    redirectURL,
+    redirectURL: redirectURL || window.location.href,
   }) as Promise<null>;
 }
 
