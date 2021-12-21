@@ -121,6 +121,22 @@ const callAuthStateChangedCallbacks = (user: User | null) => {
   loggedInUserSubscriptions.forEach((callback) => callback(user));
 };
 
+function preventOveruse(name: string, f: Function) {
+  let lastCalled: number | undefined;
+  return (...args: any[]) => {
+    if (lastCalled && Date.now() - lastCalled < 50) {
+      console.error(
+        `${name} called too often (within ${
+          Date.now() - lastCalled
+        } ms), ignoring (It is likely being called every render. Be sure to wrap any calls to set or dispatch cloud state in an event handler or useEffect hook.)`
+      );
+    } else {
+      lastCalled = Date.now();
+      f(...args);
+    }
+  };
+}
+
 //////////////////////////////////////////
 // SETUP
 //////////////////////////////////////////
@@ -346,7 +362,12 @@ export function useCloudState<State>({
     setFirstLoad(false);
   });
 
-  const setter = useCallback((s: State) => setCloudState(name, s), [name]);
+  const setter = useCallback(
+    preventOveruse(`setCloudState:${name}`, (s: State) =>
+      setCloudState(name, s)
+    ),
+    [name]
+  );
   return [state, setter];
 }
 
@@ -401,7 +422,9 @@ export function useCloudReducer<State, Action, Response>({
   // TODO - ensure that we buffer all of these until the initial state promise is set
   // otherwise we will miss any dispatches that are triggered before the new reducer is registered
   const dispatcher = useCallback(
-    (a?: Action) => dispatchCloudReducerEvent(name, a),
+    preventOveruse(`dispatchCloudReducer:${name}`, (a?: Action) =>
+      dispatchCloudReducerEvent(name, a)
+    ),
     [name]
   ) as (a?: Action) => Promise<Response>;
 
