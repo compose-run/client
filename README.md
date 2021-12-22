@@ -1,73 +1,379 @@
-# ComposeJS
+# ComposeJS – _a whole backend inside React_
 
-### _a whole backend without leaving React_
+Compose is a modern backend-as-a-service for React apps.
 
-Compose is a modern Firebase-alternative for React apps, featuring:
+- Setup in seconds: `npm install @compose-run/client` or [CodeSanbox](TODO), no account required
 
-- cloud functions deployed on every save
-- cloud versions of the react hooks you already 💖
-  - `useState` -> `useCloudState`
-  - `useReducer` -> `useCloudReducer`
-- authentication & realtime web sockets built-in
-- get started in seconds
+- Cloud versions of the react hooks you already know & love:
+
+  - [`useState`](https://reactjs.org/docs/hooks-state.html) -> [`useCloudState`](#usecloudstate)
+  - [`useReducer`](https://reactjs.org/docs/hooks-reference.html#usereducer) -> [`useCloudReducer`](#usecloudreducer)
+
+- Authentication & realtime web sockets built-in
+
 - 100% serverless
-- typescript bindings
+
+- Cloud functions, _deployed on every save!_
+
+- TypeScript bindings
+
+We're friendly! Come say hi or ask a question in [our Community chat](https://community.compose.run) 👋
 
 # Table of Contents
 
-- [Example App](#example-app)
-- [Installation](#installation)
-  - [Codesandbox Template](#codesandbox-template)
-  - [NPM or Yarn](#install-via-npm-or-yarn)
-- [Tutorial](#tutorial)
+- [ComposeJS – _a whole backend inside React_](#composejs--a-whole-backend-inside-react)
+- [Table of Contents](#table-of-contents)
+- [Guide](#guide)
+  - [Introduction](#introduction)
+  - [A simple example](#a-simple-example)
+    - [Equivalent `useState` example](#equivalent-usestate-example)
+  - [State](#state)
+  - [Names](#names)
+  - [An example with `useCloudReducer`](#an-example-with-usecloudreducer)
+  - [Reducers run in the cloud](#reducers-run-in-the-cloud)
+  - [Create a Developer Account (optional)](#create-a-developer-account-optional)
+  - [Logging in a user](#logging-in-a-user)
+  - [Permissions](#permissions)
+  - [Breaking down walls](#breaking-down-walls)
+- [Examples](#examples)
+  - [`useCloudState` Counter](#usecloudstate-counter)
+  - [`useCloudReducer` Counter](#usecloudreducer-counter)
+  - [Login](#login)
+  - [Chat App](#chat-app)
+  - [Compose Community](#compose-community)
 - [API](#api)
-  - [State Hooks](#state)
-    - [`useCloudState`](#usecloudstate)
-    - [`useCloudReducer`](#usecloudreducer)
-  - [State Utilities](#state-utilities)
-    - [`getCloudState`](#getcloudstate)
-    - [`setCloudState`](#setcloudstate)
-    - [`dispatchCloudAction`](#dispatchcloudaction)
-  - [Users & Authentication](#users--authentication)
-    - [`magicLinkLogin`](#magiclinklogin)
-    - [`useUser`](#useuser)
+  - [`useCloudState`](#usecloudstate)
+  - [`useCloudReducer`](#usecloudreducer)
+    - [The Reducer Function](#the-reducer-function)
+    - [Debugging](#debugging)
+  - [`magicLinkLogin`](#magiclinklogin)
+  - [`useUser`](#useuser)
+  - [`globalify`](#globalify)
+  - [`getCloudState`](#getcloudstate)
+  - [`setCloudState`](#setcloudstate)
+  - [`dispatchCloudAction`](#dispatchcloudaction)
 - [FAQ](#faq)
   - [What kind of state can I store?](#what-kind-of-state-can-i-store)
   - [How much data can I store?](#how-much-data-can-i-store)
+  - [How do I query the state?](#how-do-i-query-the-state)
   - [How do I debug the current value of the state?](#how-do-i-debug-the-current-value-of-the-state)
   - [Does it work offline?](#does-it-work-offline)
 - [Pricing](#pricing)
 - [Contributing](#contributing)
+  - [How to use](#how-to-use)
+  - [File Structure](#file-structure)
+  - [Developing locally](#developing-locally)
 
-# Example App
+# Guide
+
+This guide describes the various concepts used in Compose, and how they relate to each other. To get a complete picture of the system, it is recommended to go through it in the order it is presented in.
+
+## Introduction
+
+Compose provides a set of tools for building modern React apps backed by a cloud database.
+
+The design goal of Compose is to _keep you where you want to be: <ins>in your React components</ins>_. The whole system is built around React hooks and JavaScript calls. There's no CLI, admin panel, query language, or permissions language. It's just React and JavaScript, so you can focus solely on building your UI for your users. Using Compose should feel like you're building a local app – the cloud database comes for free.
+
+Compose is simple. There are just two parts:
+
+1. Cloud-versions of React's built-in hooks:
+
+   - [`useState`](https://reactjs.org/docs/hooks-state.html) -> [`useCloudState`](#usecloudstate)
+   - [`useReducer`](https://reactjs.org/docs/hooks-reference.html#usereducer) -> [`useCloudReducer`](#usecloudreducer)
+
+2. Users & authentication
+
+## A simple example
+
+The simplest way to get started is [`useCloudState`](#usecloudstate). We can use it to make a cloud counter button:
+
+```jsx
+import { useCloudState } from "@compose-run/client";
+
+function Counter() {
+  const [count, setCount] = useCloudState({ name: "count", initialState: 0 });
+  return <button onClick={() => setCount(count + 1)}>{count}</button>;
+}
+```
+
+TODO - GIF of it in two tabs
+
+[Try it in CodeSandbox](TODO)
+
+### Equivalent `useState` example
+
+If you've used `useState` before, this code should look familiar:
+
+```jsx
+function Counter() {
+  const [count, setCount] = useState(0);
+  return <button onClick={() => setCount(count + 1)}>{count}</button>;
+}
+```
+
+While Compose follows most typical React conventions, it does prefer named arguments to positional ones – except in cases of single-argument functions.
+
+## State
+
+A state in Compose is a cloud variable. It can be any JSON-serializable value. States are created and managed via the `useCloudState` and `useCloudReducer` hooks, which are cloud-persistent versions of React's built-in `useState` and `useReducer` hooks.
+
+- `useCloudState` is as simple: it returns the current value of the state, and a function to update it.
+
+- `useCloudReducer` is more complex: You can't update the state directly. You have to dispatch an action to tell the reducer to update it. More on this below.
+
+## Names
+
+Each piece of state needs a name. Compose has a global namespace. One common way to avoid collisions is to prefix the name with your app's name, i.e. `"myApp/myState"`.
+
+## An example with `useCloudReducer`
+
+The simplicity of `useCloudState` are also its downsides: _anyone_ can set it _whenever_ to _anything_.
+
+Enter `useCloudReducer`. It allows you to protect your state from illegal updates. Instead of setting the state directly, you dispatch an action to tell the reducer to update it.
+
+We can update the simple counter example from above to `useCloudReducer`:
+
+```jsx
+import { useCloudReducer } from "@compose-run/client";
+
+function Counter() {
+  const [count, dispatchCountAction] = useCloudReducer({
+    name: "count",
+    initialState: 0,
+    reducer: ({ previousState, action }) => {
+      switch (action) {
+        case "increment":
+          return previousState + 1;
+        default:
+          throw new Error(`Unexpected action: ${action}`);
+      }
+    },
+  });
+  return (
+    <button onClick={() => dispatchCountAction("increment")}>{count}</button>
+  );
+}
+```
+
+[Try it on CodeSandbox](TODO)
+
+The upsides of using `useCloudReducer` here are that we know:
+
+1. the state will always be a number
+2. the state will only every increase, one at a time
+3. that we will never "miss" an update (each update is run on the server, in order)
+
+## Reducers run in the cloud
+
+Your reducer function runs in the cloud (on our servers) every time it receives an action.
+
+We get your reducer code on the server by calling `.toString()` on your function and sending it to the server. This is how we're able to _deploy your function on every save._ Every time you change the function, we update it on the server instantly.
+
+However, if someone else tries to change the function, we'll throw an error. Whoever is logged in when a reducer name is first used is the "owner" of that reducer, and only they can change it.
+
+Currently the reducer function is extremely limited in what it can do. It cannot depend on any definitions from outside itself, require any external dependencies, or make network requests. These capabilities will be coming shortly. For now, reducers are mostly used to validate, sanitize, and authorize state updates.
+
+Any `console.log` calls or thrown errors inside your reducer will be streamed to your browser if you're are online. If not, those debug messages will be emailed to you.
+
+## Create a Developer Account (optional)
+
+If you've been following along, you know that you don't have to create an account to get started with Compose.
+
+However, it only takes 10 seconds (literally), and it will give you access to the best Compose features for free!
+
+```js
+import { magicLinkLogin } from "@compose-run/client";
+
+magicLinkLogin({
+  email: "your-email@gmail.com",
+  appName: "Your New Compose App",
+});
+```
+
+[Try it on CodeSandbox](TODO - and see if you can do this in their console without globalify)
+
+Then click the magic link in your email.
+
+Done! Your account is created, and you're logged into Compose in whatever tab you called that function.
+
+## Logging in a user
+
+Logging in users is just as easy as creating a developer account. In fact, it's the same function.
+
+Let's add a simple Login UI to our counter app:
+
+```jsx
+import { magicLinkLogin } from "@compose-run/client";
+
+function Login() {
+  const [email, setEmail] = useState("");
+  const [loginEmailSent, setLoginEmailSent] = useState(false);
+
+  if (loginEmailSent) {
+    return <div>Check your email for a magic link to log in!</div>;
+  } else {
+    return (
+      <div style={{ display: "flex" }}>
+        <h1>Login</h1>
+        <input onChange={(e) => setEmail(e.target.value)} />
+        <button
+          onClick={async () => {
+            await magicLinkLogin({ email, appName: "My App" });
+            setLoginEmailSent(true);
+          }}
+        >
+          Login
+        </button>
+      </div>
+    );
+  }
+}
+
+function App() {
+  const user = useUser();
+  if (user) {
+    return <Counter />;
+  } else {
+    return <Login />;
+  }
+}
+```
+
+## Permissions
+
+Let's prevent unauthenticated users from incrementing the counter:
+
+```jsx
+import { useCloudReducer } from "@compose-run/client";
+
+function Counter() {
+  const [count, dispatchCountAction] = useCloudReducer({
+    name: "count",
+    initialState: 0,
+    reducer: ({ previousState, action, userId }) => {
+      if (!userId) {
+        throw new Error("Unauthenticated");
+      }
+
+      switch (action) {
+        case "increment":
+          return previousState + 1;
+        default:
+          throw new Error(`Unexpected action: ${action}`);
+      }
+    },
+  });
+  return (
+    <button onClick={() => dispatchCountAction("increment")}>{count}</button>
+  );
+}
+```
+
+## Breaking down walls
+
+Compose strives to break down artificial or historical artifacts, and rethink the backend interface from first principles. This is why typical concepts in other backend frameworks are not present in Compose.
+
+Compose has no concept of an "app". It only knows about state and users. Apps are collections of state, presented via a UI. We believe the state underneath an app should be free to be used seamlessly inside other apps. We hope this will help us break down app data silos, so we can build more cohesive user experiences. Just like Stripe remembers your credit card across merchants, Compose remembers your state across apps.
+
+A user's Compose `userId` is the same no matter who logs them in to which app – as long as they use the same email address. This enables you to embed live components from other Compose apps into your app, and have the same user permissions flow through.
+
+Finally, you'll notice that there is no distinction between a developer account and a user account. We want to empower all users to share their digital worlds, and that starts by treating them as developers from day one.
+
+# Examples
+
+## `useCloudState` Counter
+
+```jsx
+import { useCloudState } from "@compose-run/client";
+
+function Counter() {
+  const [count, setCount] = useCloudState({ name: "count", initialState: 0 });
+  return <button onClick={() => setCount(count + 1)}>{count}</button>;
+}
+```
+
+[Try it in CodeSandbox](TODO)
+
+## `useCloudReducer` Counter
+
+```jsx
+import { useCloudReducer } from "@compose-run/client";
+
+function Counter() {
+  const [count, dispatchCountAction] = useCloudReducer({
+    name: "count",
+    initialState: 0,
+    reducer: ({ previousState, action }) => {
+      switch (action) {
+        case "increment":
+          return previousState + 1;
+        default:
+          throw new Error(`Unexpected action: ${action}`);
+      }
+    },
+  });
+  return (
+    <button onClick={() => dispatchCountAction("increment")}>{count}</button>
+  );
+}
+```
+
+[Try it on CodeSandbox](TODO)
+
+## Login
+
+```jsx
+import { magicLinkLogin } from "@compose-run/client";
+
+function Login() {
+  const [email, setEmail] = useState("");
+  const [loginEmailSent, setLoginEmailSent] = useState(false);
+
+  if (loginEmailSent) {
+    return <div>Check your email for a magic link to log in!</div>;
+  } else {
+    return (
+      <div style={{ display: "flex" }}>
+        <h1>Login</h1>
+        <input onChange={(e) => setEmail(e.target.value)} />
+        <button
+          onClick={async () => {
+            await magicLinkLogin({ email, appName: "My App" });
+            setLoginEmailSent(true);
+          }}
+        >
+          Login
+        </button>
+      </div>
+    );
+  }
+}
+
+function App() {
+  const user = useUser();
+  if (user) {
+    return <div>Hello, {user.email}!</div>;
+  } else {
+    return <Login />;
+  }
+}
+```
+
+[Try it on CodeSandbox](TODO)
+
+## Chat App
+
+TODO
+
+## Compose Community
 
 The Compose Community chat app is built on Compose. [Check out the code](https://github.com/compose-run/community) and [join the conversation](https://community.compose.run)!
 
-# Installation
-
-## Codesandbox Template
-
-## NPM or Yarn
-
-```
-npm install --save @compose-run/client
-```
-
-or
-
-```
-yarn add @compose-run/client
-```
-
-# Tutorial
-
 # API
 
-## State Hooks
+## `useCloudState`
 
-### `useCloudState`
-
-Where `useState` is a variable that holds state within a React Component, `useCloudState` is a cloud variable that syncs state across all instances of the same `name` parameter – for all users.
+`useCloudState` is React hook that syncs state across all instances of the same `name` parameter.
 
 ```ts
 useCloudState<State>({
@@ -81,37 +387,76 @@ useCloudState<State>({
 
 `useCloudState` requires two named arguments:
 
-- `name` (_required_) is a globally unique identifier string.
-- `initialState` (_required_) is the initial value for the state; can be any JSON object.
+- `name` (_required_) is a globally unique identifier string
+- `initialState` (_required_) is the initial value for the state; can be any JSON object
 
-It returns an array of two values, used to get and set the value of state:
+It returns an array of two values, used to get and set the value of state, respectively:
 
 1. The current value of the state. It is `null` while the state is loading.
 2. A function to set the state across all references to the `name` parameter.
 
-#### Example usage
+## `useCloudReducer`
 
-- TODO
+`useCloudReducer` is React hook for persisting complex state. It allows you to supply a `reducer` function that _runs on Compose's servers_ to handle state update logic. For example, your reducer can disallow invalid or unauthenticated updates.
 
-### `useCloudReducer`
+```ts
+function useCloudReducer<State, Action, Response>({
+  name,
+  initialState,
+  reducer,
+}: {
+  name: string;
+  initialState: State | Promise<State>;
+  reducer: ({
+    previousState,
+    action,
+    resolve,
+    userId,
+  }: {
+    previousState: State;
+    action: Action;
+    resolve: (response: Response) => void;
+    userId: number | null;
+  }) => State;
+}): [State | null, (action?: Action) => Promise<Response>];
+```
 
-Like `useReducer`, `useCloudReducer` is for maintaining complex state. It allows you to supply a `reducer` function that _runs on the server_ to handle state update logic. For example, your reducer can disallow invalid or unauthenticated updates.
+`useCloudReducer` requires three named arguments:
 
-#### Example usage
+- `name` (_required_) is a globally unique identifier string
+- `initialState` (_required_) is the initial value for the state; can be any JSON object
+- `reducer` (_required_) is a function that takes the current state, an action and context, and returns the new state
 
-- TODO
+It returns an array of two values, used to get the value of state and dispatch actions to the reducer, respectively:
 
-## Users & Authentication
+1. The current value of the state. It is `null` while the state is loading.
+2. A function to dispatch actions to the cloud reducer. It returns a `Promise` that resolves when the reducer calls `resolve` on that action. (If the reducer doesn't call `resolve`, the `Promise` never resolves.)
 
-TODO
+### The Reducer Function
 
-### `User`
+The reducer function runs on the Compose servers, and is updated every time it is changed – as long as its changed by its original creator. It cannot depend on any definitions from outside itself, require any external dependencies, or make network requests.
 
-TODO
+The reducer itself function accepts three four named arguments:
 
-### `magicLinkLogin`
+- `previousState` - the state before the action was dispatched
 
-Login users to your app via magic link.
+- `action` - the action that was dispatched
+
+- `userId` - the dispatcher user's Compose `userId` (or `null` if none)
+
+- `resolve` - a function that you can call to resolve the Promise returned by the `dispatch` function
+
+It returns the new state.
+
+### Debugging
+
+The reducer function is owned by whoever created it. Any `console.log` calls or thrown errors inside the reducer will be streamed to that user's browser console if they are online. If not, those debug messages will be emailed to them.
+
+Compose discards any actions that do not return a new state or throw an error.
+
+## `magicLinkLogin`
+
+Login users via magic link.
 
 ```ts
 export function magicLinkLogin({
@@ -125,46 +470,45 @@ export function magicLinkLogin({
 }): Promise<null>;
 ```
 
-This function returns a promise that resolves when the magic login email is successfully sent. There are two ways to react to when the user successfully logs in (after clicking the magic link in their inbox):
+It accepts two required named arguments and one optional named argument:
 
-1. `useUser: User | mull` returns a reactive state variable that will switch from `null` to the `User` on _any_ successful login
-2. `magicLinkLogin2 : [Promise<null>, Promise<User>]` returns two promises, the first resolves when the email is successfully sent, and the second resolves when the user successfully logs in from _this_ magic link
+- `email` - (_required_) the email address of the user
+- `appName` - (_required_) the name of the app in the magic email link that is sent to the user
+- `redirectURL` - (_optional_) the URL to redirect to after the user logs in. It defaults to the current `window.location.href` if not provided.
 
-#### Example usage
+It returns a `Promise` that resolves when the magic link email is successfully sent.
 
-- TODO
+## `useUser`
 
-### `useUser`
-
-`useUser` is a React hook to get the current user. It either returns the current user or `null` if no user is not logged in.
+`useUser` is a React hook to get the current user (`{email, id}`) or `null` if no user is logged in.
 
 ```ts
 useUser(): User | null
 ```
 
-#### Example usage
+## `globalify`
 
-- TODO
+`globalify` is useful utility for adding all of Compose's function to your global `window` namespace for easy access in the JS console.
 
-## State Utilities
+## `getCloudState`
 
-### `getCloudState`
+`getCloudState(name: string)` returns a `Promise` that resolves to the current value of the named state.
 
-#### Example usage
+It works for state created via both `useCloudState` and `useCloudReducer`.
 
-- TODO
+## `setCloudState`
 
-### `setCloudState`
+`setCloudState(name : string)` is a utility function for setting state.
 
-#### Example usage
+It can be used outside of a React component. It is also useful for when you want to set state without getting it.
 
-- TODO
+It will fail to set the state with an attached reducer, because those can only be updated by dispatching an action to the reducer.
 
-### `dispatchCloudAction`
+## `dispatchCloudAction`
 
-#### Example usage
+`dispatchCloudAction<Action>({name: string, action: Action})` is a utility function for dispatching actions to reducers.
 
-- TODO
+It can be used outside of a React component. It is also useful for when you want to dispatch actions without getting the state.
 
 # FAQ
 
@@ -178,6 +522,14 @@ Each `name` shouldn't hold more than **~25,000 objects or ~4MB** because all sta
 
 This limitation will be lifted when we launch **`useCloudQuery`** (_coming soon_).
 
+## How do I query the state?
+
+Each named state in Compose is analogous to a database table. However instead of using SQL or another query language, you simply use client-side JavaScript to slice and dice the state to get the data you need.
+
+Of course this doesn't scale past what state fits inside the user's browser. However we find that this limitation is find for the purposes of prototyping an MVP of up to hundreds of active users.
+
+We plan to launch `useCloudQuery` soon, which will enable you to run _server-side JavaScript_ on your state before sending it to the client, largely removing this size limitation, while still keeping the JavaScript as the "query language".
+
 ## How do I debug the current value of the state?
 
 You can get the current value of the state as a `Promise` and log it:
@@ -188,7 +540,9 @@ const testState = await getCloudState({ name: "test-state" });
 console.log(testState);
 ```
 
-You can print out all changes to cloud state from within a React component:
+You may need to use [`globalify`](#globalify) to get access to Compose functions (like `getCloudState`) in your JS console.
+
+You can also print out all changes to cloud state from within a React component:
 
 ```js
 const [testState, setTestState] = useCloudState({
@@ -201,7 +555,7 @@ useEffect(() => console.log(testState), [testState]);
 
 ## Does it work offline?
 
-Compose doesn't allow any offline editing. We may add a CRDT mode in the future which would enable offline edits.
+Compose doesn't allow any offline editing. We plan to add a CRDT mode in the future which would enable offline edits.
 
 # Pricing
 
@@ -216,7 +570,7 @@ Compose is currently free while we work on a pricing model.
 
 ## File Structure
 
-There are just two files, really:
+There are just two files:
 
 - `index.ts`, which contains the whole library
 - `shared-types.ts`, which contains all the types that are shared between the client and server
