@@ -459,7 +459,7 @@ Compose discards any actions that do not return a new state or throw an error.
 Login users via magic link.
 
 ```ts
-export function magicLinkLogin({
+function magicLinkLogin({
   email,
   appName,
   redirectURL,
