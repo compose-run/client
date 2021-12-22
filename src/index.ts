@@ -302,7 +302,7 @@ function useSubscription<State>(name: string, setState: (data: State) => void) {
 }
 
 // utilizes the subscription & cache infrastructure to get a single state value as a Promise
-export function getCloudState<State>(name: string): Promise<State | null> {
+function getCloudState<State>(name: string): Promise<State | null> {
   return new Promise((resolve) => {
     // use the cache if the subscription is live
     if (liveSubscriptions.has(name)) {
@@ -336,15 +336,15 @@ export function getCloudState<State>(name: string): Promise<State | null> {
 // Cloud State
 //////////////////////////////////////////
 
-export function setCloudState<A>(name: string, value: unknown) {
+function setCloudState<State>({ name, state }: { name: string; state: State }) {
   send({
     type: "StateUpdateRequest",
     name,
-    value,
+    value: state,
   });
 }
 
-export function useCloudState<State>({
+function useCloudState<State>({
   name,
   initialState,
 }: {
@@ -355,7 +355,7 @@ export function useCloudState<State>({
   const [firstLoad, setFirstLoad] = useState(true);
   useSubscription(name, (state: State) => {
     if (!state && firstLoad) {
-      setCloudState(name, initialState);
+      setCloudState({ name, state: initialState });
     } else {
       setState(state);
     }
@@ -364,7 +364,7 @@ export function useCloudState<State>({
 
   const setter = useCallback(
     preventOveruse(`setCloudState:${name}`, (s: State) =>
-      setCloudState(name, s)
+      setCloudState({ name, state: s })
     ),
     [name]
   );
@@ -375,33 +375,38 @@ export function useCloudState<State>({
 // CLOUD REDUCER
 //////////////////////////////////////////
 
-export function dispatchCloudReducerEvent<Event, Response>(
-  name: string,
-  event: Event
-): Promise<Response> {
+function dispatchCloudAction<Action, Response>({
+  name,
+  action,
+}: {
+  name: string;
+  action: Action;
+}): Promise<Response> {
   return send({
     type: "ReducerEventRequest",
     name,
-    value: event,
+    value: action,
   });
 }
 
-export function useCloudReducer<State, Action, Response>({
+function useCloudReducer<State, Action, Response>({
   name,
   initialState,
   reducer,
 }: {
   name: string;
-  initialState: State | Promise<State>; //(() => Promise<State>);
-  reducer: (
-    state: State,
-    action: Action,
-    context: {
-      resolve: (response: Response) => void;
-      userId: number;
-      timestamp: number;
-    }
-  ) => State;
+  initialState: State | Promise<State>;
+  reducer: ({
+    previousState,
+    action,
+    resolve,
+    userId,
+  }: {
+    previousState: State;
+    action: Action;
+    resolve: (response: Response) => void;
+    userId: number | null;
+  }) => State;
 }): [State | null, (action?: Action) => Promise<Response>] {
   const [state, setState] = useState(getCachedState(name));
   useSubscription(name, setState);
@@ -423,7 +428,7 @@ export function useCloudReducer<State, Action, Response>({
   // otherwise we will miss any dispatches that are triggered before the new reducer is registered
   const dispatcher = useCallback(
     preventOveruse(`dispatchCloudReducer:${name}`, (a?: Action) =>
-      dispatchCloudReducerEvent(name, a)
+      dispatchCloudAction({ name, action: a })
     ),
     [name]
   ) as (a?: Action) => Promise<Response>;
@@ -461,7 +466,7 @@ const registerReducer = <State>({
 // USER & AUTH
 //////////////////////////////////////////
 
-export function magicLinkLogin({
+function magicLinkLogin({
   email,
   appName,
   redirectURL,
@@ -478,7 +483,7 @@ export function magicLinkLogin({
   }) as Promise<null>;
 }
 
-export function magicLinkLogin2({
+function magicLinkLogin2({
   email,
   appName,
   redirectURL,
@@ -505,7 +510,7 @@ export function magicLinkLogin2({
   return [sendMagicLinkPromise as Promise<null>, loginPromise];
 }
 
-export function useUser(): User | null {
+function useUser(): User | null {
   const [user, setUser] = useState<User | null>(loggedInUser);
   useEffect(() => {
     loggedInUserSubscriptions.add(setUser);
@@ -522,9 +527,39 @@ function clearUserCache() {
   localStorage.removeItem(COMPOSE_USER_CACHE_KEY);
 }
 
-export function logout() {
+function logout() {
   clearUserCache();
   socket.send(JSON.stringify({ type: "LogoutRequest" }));
 }
 
+const _exports = {
+  logout,
+  useUser,
+  magicLinkLogin,
+  magicLinkLogin2,
+  useCloudState,
+  useCloudReducer,
+  dispatchCloudAction,
+  getCloudState,
+  setCloudState,
+};
+
+function globalify() {
+  Object.entries(_exports).forEach(([key, value]) => {
+    (window as any)[key] = value;
+  });
+}
+
+export {
+  logout,
+  useUser,
+  magicLinkLogin,
+  magicLinkLogin2,
+  useCloudState,
+  useCloudReducer,
+  dispatchCloudAction,
+  getCloudState,
+  setCloudState,
+  globalify,
+};
 export { Request, Request_, Response, User } from "./shared-types";
