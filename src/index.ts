@@ -228,7 +228,7 @@ const handleServerResponse = function (event: MessageEvent) {
     // so we don't want to spam the console with this error for all clients
     // so currently we're just going to ignore this error...
 
-    if (data.value) {
+    if (data.value !== undefined && data.value !== null) {
       updateValue(data.name, data.value);
     }
   } else if (data.type === "UnsubscribeResponse") {
