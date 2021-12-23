@@ -2,8 +2,6 @@
 
 Compose is a modern backend-as-a-service for React apps.
 
-**Warning: This is beta software. There will be bugs, downtime, and unstable APIs.** (We hope to make up for the early, rough edges with white-glove service from our team.)
-
 - Setup in seconds: `npm install @compose-run/client` or [CodeSandbox](https://codesandbox.io/s/wild-wildflower-vq2q4?fontsize=14&hidenavigation=1&theme=dark), no account required
 
 - Cloud versions of the react hooks you already know & love:
@@ -20,6 +18,8 @@ Compose is a modern backend-as-a-service for React apps.
 - TypeScript bindings
 
 We're friendly! Come say hi or ask a question in [our Community chat](https://community.compose.run) 👋
+
+**Warning: This is beta software. There will be bugs, downtime, and unstable APIs.** (We hope to make up for the early, rough edges with white-glove service from our team.)
 
 # Table of Contents
 
