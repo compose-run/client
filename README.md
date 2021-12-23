@@ -90,6 +90,11 @@ The simplest way to get started is [`useCloudState`](#usecloudstate). We can use
 import { useCloudState } from "@compose-run/client";
 
 function Counter() {
+  const [count, setCount] = useCloudState({
+    name: "examples/count",
+    initialState: 0,
+  });
+
   return (
     <div>
       <h1>Hello Compose</h1>
@@ -116,15 +121,15 @@ function Counter() {
 }
 ```
 
-While Compose follows most typical React conventions, it does prefer named arguments to positional ones – except in cases of single-argument functions.
+While Compose follows most React conventions, it does prefer named arguments to positional ones – except in cases of single-argument functions.
 
 ## State
 
 A state in Compose is a cloud variable. It can be any JSON-serializable value. States are created and managed via the `useCloudState` and `useCloudReducer` hooks, which are cloud-persistent versions of React's built-in `useState` and `useReducer` hooks.
 
-- `useCloudState` is as simple: it returns the current value of the state, and a function to update it.
+- `useCloudState` is simple. It returns the current value of the state, and a function to set it.
 
-- `useCloudReducer` is more complex: You can't update the state directly. You have to dispatch an action to tell the reducer to update it. More on this below.
+- `useCloudReducer` is more complex. You can't update the state directly. You have to dispatch an action to tell the reducer to update it. More on this below.
 
 ## Names
 
@@ -174,11 +179,11 @@ Your reducer function runs in the cloud (on our servers) every time it receives 
 
 We get your reducer code on the server by calling `.toString()` on your function and sending it to the server. This is how we're able to _deploy your function on every save._ Every time you change the function, we update it on the server instantly.
 
-However, if someone else tries to change the function, we'll throw an error. Whoever is logged in when a reducer name is first used is the "owner" of that reducer, and only they can change it.
+If someone else tries to change the function, we'll throw an error. Whoever is logged in when a reducer's name is first used is the "owner" of that reducer, and the only one who can change it.
 
-Currently the reducer function is extremely limited in what it can do. It cannot depend on any definitions from outside itself, require any external dependencies, or make network requests. These capabilities will be coming shortly. For now, reducers are mostly used to validate, sanitize, and authorize state updates.
+Currently the reducer function is extremely limited in what it can do. It cannot depend on any definitions from outside itself, require any external dependencies, or make network requests. These capabilities will be coming shortly. For now, reducers are used to validate, sanitize, and authorize state updates.
 
-Any `console.log` calls or thrown errors inside your reducer will be streamed to your browser if you're are online. If not, those debug messages will be emailed to you.
+Any `console.log` calls or errors thrown inside your reducer will be streamed to your browser if you're are online. If not, those debug messages will be emailed to you.
 
 ## Create a Developer Account (optional)
 
@@ -280,13 +285,13 @@ function Counter() {
 
 ## Breaking down walls
 
-Compose strives to break down artificial or historical artifacts, and rethink the backend interface from first principles. This is why typical concepts in other backend frameworks are not present in Compose.
+Compose strives to break down unnecessary boundaries, and rethink the backend interface from first principles. Some concepts from other backend frameworks are not present in Compose.
 
-Compose has no concept of an "app". It only knows about state and users. Apps are collections of state, presented via a UI. We believe the state underneath an app should be free to be used seamlessly inside other apps. We hope this will help us break down app data silos, so we can build more cohesive user experiences. Just like Stripe remembers your credit card across merchants, Compose remembers your state across apps.
+Compose has no concept of an "app". It only knows about state and users. Apps are collections of state, presented via a UI. The state underpinning a Compose app is free to be used seamlessly inside other apps. This breaks down the walls between app data silos, so we can build more cohesive user experiences. Just like Stripe remembers your credit card across merchants, Compose remembers your states across apps.
 
-A user's Compose `userId` is the same no matter who logs them in to which app – as long as they use the same email address. This enables you to embed live components from other Compose apps into your app, and have the same user permissions flow through.
+A user's Compose `userId` is the same no matter who which Compose app they login to – as long as they use the same email address. This enables you to embed _first-class, fullstack components_ from other Compose apps into your app, and have the same user permissions flow through.
 
-Finally, you'll notice that there is no distinction between a developer account and a user account. We want to empower all users to share their digital worlds, and that starts by treating them as developers from day one.
+Finally, you'll notice that there is no distinction between a developer account and a user account in Compose. We want all users to have a hand in shaping their digital worlds. This starts by treating everyone as a developer from day one.
 
 # Examples
 
@@ -296,6 +301,11 @@ Finally, you'll notice that there is no distinction between a developer account 
 import { useCloudState } from "@compose-run/client";
 
 function Counter() {
+  const [count, setCount] = useCloudState({
+    name: "examples/count",
+    initialState: 0,
+  });
+
   return (
     <div>
       <h1>Hello Compose</h1>
@@ -461,9 +471,9 @@ It returns the new state.
 
 ### Debugging
 
-The reducer function is owned by whoever created it. Any `console.log` calls or thrown errors inside the reducer will be streamed to that user's browser console if they are online. If not, those debug messages will be emailed to them.
+The reducer function is owned by whoever created it. Any `console.log` calls or errors thrown inside the reducer will be streamed to that user's browser console if they are online. If not, those debug messages will be emailed to them.
 
-Compose discards any actions that do not return a new state or throw an error.
+Compose discards any actions that do not return a new state or throw an error, and leave the state unchanged.
 
 ## `magicLinkLogin`
 
@@ -494,7 +504,7 @@ It returns a `Promise` that resolves when the magic link email is successfully s
 `useUser` is a React hook to get the current user (`{email, id}`) or `null` if no user is logged in.
 
 ```ts
-useUser(): User | null
+useUser(): {email : string, id: number} | null
 ```
 
 ## `globalify`
@@ -505,7 +515,7 @@ useUser(): User | null
 
 `getCloudState(name: string)` returns a `Promise` that resolves to the current value of the named state.
 
-It works for state created via both `useCloudState` and `useCloudReducer`.
+It works for states created via either `useCloudState` and `useCloudReducer`.
 
 ## `setCloudState`
 
@@ -513,7 +523,7 @@ It works for state created via both `useCloudState` and `useCloudReducer`.
 
 It can be used outside of a React component. It is also useful for when you want to set state without getting it.
 
-It will fail to set the state with an attached reducer, because those can only be updated by dispatching an action to the reducer.
+It will fail to set any states with attached reducers, because those can only be updated by dispatching an action to the reducer.
 
 ## `dispatchCloudAction`
 
@@ -537,7 +547,7 @@ This limitation will be lifted when we launch **`useCloudQuery`** (_coming soon_
 
 Each named state in Compose is analogous to a database table. However instead of using SQL or another query language, you simply use client-side JavaScript to slice and dice the state to get the data you need.
 
-Of course this doesn't scale past what state fits inside the user's browser. However we find that this limitation is find for the purposes of prototyping an MVP of up to hundreds of active users.
+Of course this doesn't scale past what state fits inside the user's browser. However we find that this limitation is workable for prototyping an MVP of up to hundreds of active users.
 
 We plan to launch `useCloudQuery` soon, which will enable you to run _server-side JavaScript_ on your state before sending it to the client, largely removing this size limitation, while still keeping the JavaScript as the "query language".
 
