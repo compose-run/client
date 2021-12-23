@@ -35,6 +35,10 @@ We're friendly! Come say hi or ask a question in [our Community chat](https://co
   - [Logging in a user](#logging-in-a-user)
   - [Permissions](#permissions)
   - [Breaking down walls](#breaking-down-walls)
+  - [Branches](#branches)
+  - [Migrations](#migrations)
+  - [Frameworks](#frameworks)
+  - [Deployment](#deployment)
 - [Examples](#examples)
   - [`useCloudState` Counter](#usecloudstate-counter)
   - [`useCloudReducer` Counter](#usecloudreducer-counter)
@@ -292,6 +296,69 @@ Compose has no concept of an "app". It only knows about state and users. Apps ar
 A user's Compose `userId` is the same no matter who which Compose app they login to – as long as they use the same email address. This enables you to embed _first-class, fullstack components_ from other Compose apps into your app, and have the same user permissions flow through.
 
 Finally, you'll notice that there is no distinction between a developer account and a user account in Compose. We want all users to have a hand in shaping their digital worlds. This starts by treating everyone as a developer from day one.
+
+## Branches
+
+When developing an app with users, you'll likely want to create isolated branches for each piece of your app's state. A simple way to accomplish this is to add the git branch's name to the state's `name`:
+
+```js
+useCloudReducer({
+  name: `${appName}/${process.env.BRANCH_NAME}/myState`,
+  ...
+```
+
+(You'd need to add `BRANCH_NAME=$(git symbolic-ref --short HEAD)` before your `npm start` command runs.)
+
+## Migrations
+
+Compose doesn't have a proper migration system yet, but we are able to achieve atomic migrations in a couple steps.
+
+The basic idea is that each new commit is an isolated state. This is achieved by adding the git commit hash into the state's `name`.
+
+```js
+useCloudReducer({
+  name: `${appName}/${process.env.BRANCH_NAME}/${process.env.COMMIT_HASH}/myState`,
+  ...
+```
+
+(You'd need to add `COMMIT_HASH=$(git log --pretty=format:'%H' -n 1)` before your `npm start` command runs.)
+
+The trick is that the `initialState` would be the last state from the prior commit hash + your migration function.
+
+```js
+useCloudReducer({
+  initialState: getPreviousState(stateName).then(migration),
+  ...
+```
+
+You can read more about this scheme in the [Compose Community README](https://github.com/compose-run/community/blob/main/README.md#branches--migrations), where it is currently implemented.
+
+## Frameworks
+
+We are agonistic about your choice of React framework. Compose works with:
+
+- Create React App
+- NextJS
+- Gatsby
+- Parcel
+- Vanilla React
+- TypeScript & JavaScript
+- yarn, npm, webpack, etc
+- etc
+
+There can be issues with using certain Babel features inside your reducer functions, but we're working on a fix!
+
+## Deployment
+
+Compose is deployed at runtime. If your code works, it's deployed.
+
+For deploying your frontend assets, we recommend the usual cast of characters for deploying Jamstack apps:
+
+- Vercel
+- Netlify
+- Heroku
+- Github Pages
+- etc
 
 # Examples
 
