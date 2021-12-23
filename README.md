@@ -2,7 +2,7 @@
 
 Compose is a modern backend-as-a-service for React apps.
 
-- Setup in seconds: `npm install @compose-run/client` or [CodeSanbox](TODO), no account required
+- Setup in seconds: `npm install @compose-run/client` or [CodeSandbox](https://codesandbox.io/s/wild-wildflower-vq2q4?fontsize=14&hidenavigation=1&theme=dark), no account required
 
 - Cloud versions of the react hooks you already know & love:
 
@@ -39,8 +39,7 @@ We're friendly! Come say hi or ask a question in [our Community chat](https://co
   - [`useCloudState` Counter](#usecloudstate-counter)
   - [`useCloudReducer` Counter](#usecloudreducer-counter)
   - [Login](#login)
-  - [Chat App](#chat-app)
-  - [Compose Community](#compose-community)
+  - [Compose Community Chat App](#compose-community-chat-app)
 - [API](#api)
   - [`useCloudState`](#usecloudstate)
   - [`useCloudReducer`](#usecloudreducer)
@@ -91,14 +90,20 @@ The simplest way to get started is [`useCloudState`](#usecloudstate). We can use
 import { useCloudState } from "@compose-run/client";
 
 function Counter() {
-  const [count, setCount] = useCloudState({ name: "count", initialState: 0 });
-  return <button onClick={() => setCount(count + 1)}>{count}</button>;
+  return (
+    <div>
+      <h1>Hello Compose</h1>
+      <button onClick={() => setCount(count + 1)}>
+        I've been clicked {count} times
+      </button>
+    </div>
+  );
 }
 ```
 
-TODO - GIF of it in two tabs
+[![Edit Compose useCloudState Counter](https://codesandbox.io/static/img/play-codesandbox.svg)](https://codesandbox.io/s/wild-wildflower-vq2q4?fontsize=14&hidenavigation=1&theme=dark)
 
-[Try it in CodeSandbox](TODO)
+![compose-counter](https://user-images.githubusercontent.com/2288939/147256919-d5a8893c-5e48-4a3f-973f-65747b2ff1aa.gif)
 
 ### Equivalent `useState` example
 
@@ -155,7 +160,7 @@ function Counter() {
 }
 ```
 
-[Try it on CodeSandbox](TODO)
+[![Edit Compose Counter (useCloudReducer)](https://codesandbox.io/static/img/play-codesandbox.svg)](https://codesandbox.io/s/compose-usecloudreducer-counter-fyh8t?fontsize=14&hidenavigation=1&theme=dark)
 
 The upsides of using `useCloudReducer` here are that we know:
 
@@ -190,7 +195,7 @@ magicLinkLogin({
 });
 ```
 
-[Try it on CodeSandbox](TODO - and see if you can do this in their console without globalify)
+[![Edit Compose Developer Account](https://codesandbox.io/static/img/play-codesandbox.svg)](https://codesandbox.io/s/compose-developer-account-kv1jv?fontsize=14&hidenavigation=1&theme=dark)
 
 Then click the magic link in your email.
 
@@ -239,6 +244,8 @@ function App() {
 }
 ```
 
+[![Edit Compose Login Users & Authenticated Count](https://codesandbox.io/static/img/play-codesandbox.svg)](https://codesandbox.io/s/compose-login-users-authenticated-count-28mo1?fontsize=14&hidenavigation=1&theme=dark)
+
 ## Permissions
 
 Let's prevent unauthenticated users from incrementing the counter:
@@ -269,6 +276,8 @@ function Counter() {
 }
 ```
 
+[![Edit Compose Login Users & Authenticated Count](https://codesandbox.io/static/img/play-codesandbox.svg)](https://codesandbox.io/s/compose-login-users-authenticated-count-28mo1?fontsize=14&hidenavigation=1&theme=dark)
+
 ## Breaking down walls
 
 Compose strives to break down artificial or historical artifacts, and rethink the backend interface from first principles. This is why typical concepts in other backend frameworks are not present in Compose.
@@ -287,12 +296,18 @@ Finally, you'll notice that there is no distinction between a developer account 
 import { useCloudState } from "@compose-run/client";
 
 function Counter() {
-  const [count, setCount] = useCloudState({ name: "count", initialState: 0 });
-  return <button onClick={() => setCount(count + 1)}>{count}</button>;
+  return (
+    <div>
+      <h1>Hello Compose</h1>
+      <button onClick={() => setCount(count + 1)}>
+        I've been clicked {count} times
+      </button>
+    </div>
+  );
 }
 ```
 
-[Try it in CodeSandbox](TODO)
+[![Edit Compose useCloudState Counter](https://codesandbox.io/static/img/play-codesandbox.svg)](https://codesandbox.io/s/wild-wildflower-vq2q4?fontsize=14&hidenavigation=1&theme=dark)
 
 ## `useCloudReducer` Counter
 
@@ -318,7 +333,7 @@ function Counter() {
 }
 ```
 
-[Try it on CodeSandbox](TODO)
+[![Edit Compose Counter (useCloudReducer)](https://codesandbox.io/static/img/play-codesandbox.svg)](https://codesandbox.io/s/compose-usecloudreducer-counter-fyh8t?fontsize=14&hidenavigation=1&theme=dark)
 
 ## Login
 
@@ -359,13 +374,9 @@ function App() {
 }
 ```
 
-[Try it on CodeSandbox](TODO)
+[![Edit Compose Login Users & Authenticated Count](https://codesandbox.io/static/img/play-codesandbox.svg)](https://codesandbox.io/s/compose-login-users-authenticated-count-28mo1?fontsize=14&hidenavigation=1&theme=dark)
 
-## Chat App
-
-TODO
-
-## Compose Community
+## Compose Community Chat App
 
 The Compose Community chat app is built on Compose. [Check out the code](https://github.com/compose-run/community) and [join the conversation](https://community.compose.run)!
 
