@@ -8,13 +8,35 @@ import { Request, Request_, Response, User } from "./shared-types";
 const COMPOSE_USER_CACHE_KEY = "compose-cache:user";
 const COMPOSE_TOKEN_KEY = "compose-token";
 
+// using Compose in an incognito window inside an iframe (e.g. in CodeSandbox in an incognito window)
+// throws an error when trying to access localStorage
+// this safeLocalStorage replaces localStorage with an in-memory version
+let inBrowserLocalStorage: { [name: string]: string } = {};
+let safeLocalStorage: {
+  getItem: (name: string) => string | null;
+  setItem: (name: string, value: string) => void;
+  removeItem: (name: string) => void;
+};
+try {
+  safeLocalStorage = localStorage;
+} catch {
+  safeLocalStorage = {
+    setItem: (name: string, value: string) =>
+      (inBrowserLocalStorage[name] = value),
+    getItem: (name: string) => inBrowserLocalStorage[name],
+    removeItem: (name: string) => delete inBrowserLocalStorage[name],
+  };
+}
+
 const subscriptions: {
   [key: string]: Set<(data: React.SetStateAction<any>) => void>;
 } = {};
 
 let loggedInUser: User | null = null;
-if (localStorage.getItem(COMPOSE_USER_CACHE_KEY)) {
-  loggedInUser = safeParseJSON(localStorage.getItem(COMPOSE_USER_CACHE_KEY));
+if (safeLocalStorage.getItem(COMPOSE_USER_CACHE_KEY)) {
+  loggedInUser = safeParseJSON(
+    safeLocalStorage.getItem(COMPOSE_USER_CACHE_KEY)
+  );
 }
 const loggedInUserSubscriptions = new Set<(user: User | null) => void>();
 
@@ -104,14 +126,16 @@ function updateValue(name: string, value: unknown) {
 
 const getCachedState = <State>(name: string): State | null => {
   try {
-    return JSON.parse(localStorage.getItem("compose-cache:" + name) || "null");
+    return JSON.parse(
+      safeLocalStorage.getItem("compose-cache:" + name) || "null"
+    );
   } catch (e) {
     return null;
   }
 };
 
 const setCachedState = (name: string, value: any) =>
-  localStorage.setItem(
+  safeLocalStorage.setItem(
     "compose-cache:" + name,
     JSON.stringify(value) || "null"
   );
@@ -188,8 +212,11 @@ const handleServerResponse = function (event: MessageEvent) {
     }
   } else if (data.type === "LoginResponse") {
     if (data.token) {
-      localStorage.setItem(COMPOSE_TOKEN_KEY, data.token);
-      localStorage.setItem(COMPOSE_USER_CACHE_KEY, JSON.stringify(data.user));
+      safeLocalStorage.setItem(COMPOSE_TOKEN_KEY, data.token);
+      safeLocalStorage.setItem(
+        COMPOSE_USER_CACHE_KEY,
+        JSON.stringify(data.user)
+      );
       loggedInUser = data.user || null;
       getCallbacks(data.requestId)[2](data.user);
       callAuthStateChangedCallbacks(loggedInUser);
@@ -198,7 +225,7 @@ const handleServerResponse = function (event: MessageEvent) {
       clearUserCache();
       callAuthStateChangedCallbacks(null);
     } else {
-      // token already saved in localStorage
+      // token already saved in safeLocalStorage
       getCallbacks(data.requestId)[0](loggedInUser);
       callAuthStateChangedCallbacks(loggedInUser);
     }
@@ -244,10 +271,10 @@ const handleServerResponse = function (event: MessageEvent) {
 
 const handleSocketOpen = async () => {
   socketOpen = true;
-  if (localStorage.getItem(COMPOSE_TOKEN_KEY)) {
+  if (safeLocalStorage.getItem(COMPOSE_TOKEN_KEY)) {
     send({
       type: "LoginRequest",
-      token: localStorage.getItem(COMPOSE_TOKEN_KEY) as string,
+      token: safeLocalStorage.getItem(COMPOSE_TOKEN_KEY) as string,
     });
   }
   // maybe sending while awaiting to ensure ordering is overkill
@@ -523,8 +550,8 @@ function useUser(): User | null {
 
 function clearUserCache() {
   loggedInUser = null;
-  localStorage.removeItem(COMPOSE_TOKEN_KEY);
-  localStorage.removeItem(COMPOSE_USER_CACHE_KEY);
+  safeLocalStorage.removeItem(COMPOSE_TOKEN_KEY);
+  safeLocalStorage.removeItem(COMPOSE_USER_CACHE_KEY);
 }
 
 function logout() {
