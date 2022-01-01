@@ -53,6 +53,7 @@ We're friendly! Come say hi or ask a question in [our Community chat](https://co
     - [Debugging](#debugging)
   - [`magicLinkLogin`](#magiclinklogin)
   - [`useUser`](#useuser)
+  - [`logout`](#logout)
   - [`globalify`](#globalify)
   - [`getCloudState`](#getcloudstate)
   - [`setCloudState`](#setcloudstate)
@@ -576,6 +577,10 @@ It returns a `Promise` that resolves when the magic link email is successfully s
 useUser(): {email : string, id: number} | null
 ```
 
+## `logout`
+
+This logs out the currently logged in user if there is one. It is called with no arguments: `logout()`.
+
 ## `globalify`
 
 `globalify` is useful utility for adding all of Compose's function to your global `window` namespace for easy access in the JS console.
@@ -588,7 +593,7 @@ It works for states created via either `useCloudState` and `useCloudReducer`.
 
 ## `setCloudState`
 
-`setCloudState(name : string)` is a utility function for setting state.
+`setCloudState({name : string, state: State})` is a utility function for setting state.
 
 It can be used outside of a React component. It is also useful for when you want to set state without getting it.
 
