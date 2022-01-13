@@ -155,7 +155,7 @@ import { useCloudReducer } from "@compose-run/client";
 
 function Counter() {
   const [count, dispatchCountAction] = useCloudReducer({
-    name: "count",
+    name: "examples/reducer-count",
     initialState: 0,
     reducer: ({ previousState, action }) => {
       switch (action) {
@@ -267,7 +267,7 @@ import { useCloudReducer } from "@compose-run/client";
 
 function Counter() {
   const [count, dispatchCountAction] = useCloudReducer({
-    name: "count",
+    name: "examples/authenticated-count",
     initialState: 0,
     reducer: ({ previousState, action, userId }) => {
       if (!userId) {
@@ -396,7 +396,7 @@ import { useCloudReducer } from "@compose-run/client";
 
 function Counter() {
   const [count, dispatchCountAction] = useCloudReducer({
-    name: "count",
+    name: "examples/reducer-count",
     initialState: 0,
     reducer: ({ previousState, action }) => {
       switch (action) {
