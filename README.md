@@ -78,11 +78,11 @@ This guide describes the various concepts used in Compose, and how they relate t
 
 Compose provides a set of tools for building modern React apps backed by a cloud database.
 
-The design goal of Compose is to _keep you where you want to be: <ins>in your React components</ins>_. The whole system is built around React hooks and JavaScript calls. There's no CLI, admin panel, query language, or permissions language. It's just React and JavaScript, so you can focus solely on building your UI for your users. Using Compose should feel like you're building a local app – the cloud database comes for free.
+The design goal of Compose is to _get out of your way_, so you can focus on crafting the perfect user interface for your users. The whole system is built around React hooks and JavaScript calls. There's no CLI, admin panel, query language, or permissions language. It's just React and JavaScript. Using Compose should feel like you're building a local app – the cloud database comes for free.
 
 Compose is simple. There are just two parts:
 
-1. Cloud-versions of React's built-in hooks:
+1. A key-value store, accessed via cloud-versions of React's built-in hooks:
 
    - [`useState`](https://reactjs.org/docs/hooks-state.html) -> [`useCloudState`](#usecloudstate)
    - [`useReducer`](https://reactjs.org/docs/hooks-reference.html#usereducer) -> [`useCloudReducer`](#usecloudreducer)
